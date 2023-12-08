@@ -1,7 +1,12 @@
-from setup import db, ma
+# Standard Library Modules
 from datetime import datetime
+
+# Third-party Library Modules
 from marshmallow import fields
 from marshmallow.validate import OneOf
+
+# Local Modules
+from setup import db, ma
 
 
 VALID_CATEGORIES = (
@@ -26,17 +31,19 @@ class ItemPost(db.Model):
     seen_location_id = db.Column(
         db.Integer,
         db.ForeignKey('locations.id'),
-        nullable=False
     )
     pickup_location_id = db.Column(
         db.Integer,
         db.ForeignKey('locations.id'),
-        nullable=False
     )
 
-    # SQLAlchemy relationship - nests an instance of a User model in this one
-    user = db.relationship('User', back_populates='cards')
-    comments = db.relationship('Comment', back_populates='card')
+    # Relationships
+    user = db.relationship('User', back_populates='item_posts')
+    comments = db.relationship('Comment', back_populates='item_post')
+    images = db.relationship('Image', back_populates='item_post')
+    seen_location = db.relationship('Location', back_populates='item_post_seen', foreign_keys=[seen_location_id])
+    pickup_location = db.relationship('Location', back_populates='item_post_pickup', foreign_keys=[pickup_location_id])
+
 
 class ItemPostSchema(ma.Schema):
     user = fields.Nested('UserSchema', only=['id', 'username'])
@@ -47,4 +54,4 @@ class ItemPostSchema(ma.Schema):
 
     class Meta:
         fields = ("id", "title", "item_type", "category", "item_description", "retrieval_description",
-                  "status", "date", "user", "seen_location", "pickup_location")
+                  "status", "date", "user", "comments", "images", "seen_location", "pickup_location")

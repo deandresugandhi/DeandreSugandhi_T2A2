@@ -1,10 +1,11 @@
 from flask import Blueprint
-from src.setup import db, bcrypt
-from src.models.user import User
-from src.models.item_post import ItemPost
-from src.models.comment import Comment
-from src.models.image import Image
-from datetime import date, time
+from setup import db, bcrypt
+from models.user import User
+from models.item_post import ItemPost
+from models.comment import Comment
+from models.image import Image
+from models.location import Location
+from datetime import date, datetime
 
 
 db_commands = Blueprint('db', __name__)
@@ -18,6 +19,28 @@ def db_create():
 
 @db_commands.cli.command("seed")
 def db_seed():
+
+   # Locations
+    locations = [
+        Location(
+            street_number = 2,
+            street_name = "Muller Lane",
+            suburb = "Mascot",
+            postcode = 2020,
+            country = "Australia"
+        ),
+        Location(
+            street_number = 1,
+            street_name = "Kensington Road",
+            suburb = "Kensington",
+            postcode = 2033,
+            country = "Australia"
+        ),
+    ]
+
+    db.session.add_all(locations)
+    db.session.commit()
+
     # Users
     users = [
         User(
@@ -44,7 +67,7 @@ def db_seed():
     db.session.add_all(users)
     db.session.commit()
 
-    # Cards
+    # Item Posts
     item_posts = [
         ItemPost(
             title="HP Laptop",
@@ -52,6 +75,8 @@ def db_seed():
             category = "electronics",
             item_description = "Black HP laptop, with stickers",
             retrieval_description = "Please call 0451 123 456 if found",
+            seen_location_id = locations[0].id,
+            pickup_location_id = locations[1].id,
             status="unclaimed",
             date = date.today(),
             user_id = users[1].id
@@ -63,7 +88,7 @@ def db_seed():
             item_description="Black t-shirt, with blue decorations",
             retrieval_description = "Please call me on 0451 123 456 if it is yours",
             status="unclaimed",
-            date_created=date.today(),
+            date=date.today(),
             user_id = users[1].id
         ),
         ItemPost(
@@ -73,7 +98,7 @@ def db_seed():
             item_description="Black Kingston USB with red decorations",
             retrieval_description = "Please call 0451 234 567 if found",
             status="pending",
-            date_created=date.today(),
+            date=date.today(),
             user_id = users[2].id
         ),
     ]
@@ -84,19 +109,19 @@ def db_seed():
     comments = [
         Comment(
             comment_text = "I think I may have found it, is this it? Check the photo",
-            time_stamp = time.now(),
+            time_stamp = datetime.now(),
             user_id=users[2].id,
             item_post_id = item_posts[0].id
         ),
         Comment(
             comment_text = "That's the one, thanks! Where are you located?",
-            time_stamp = time.now(),
+            time_stamp = datetime.now(),
             user_id=users[1].id,
             item_post_id = item_posts[0].id
         ),
         Comment(
             comment_text = "Comment 1",
-            time_stamp = time.now(),
+            time_stamp = datetime.now(),
             user_id=users[1].id,
             item_post_id = item_posts[0].id
         )
@@ -126,5 +151,5 @@ def db_seed():
 
     db.session.add_all(images)
     db.session.commit()
-    
+
     print("Database seeded")
