@@ -3,7 +3,7 @@ from datetime import datetime
 
 # Third-party Library Modules
 from marshmallow import fields
-from marshmallow.validate import OneOf
+from marshmallow.validate import OneOf, Regexp, Length, And
 
 # Local Modules
 from setup import db, ma
@@ -46,7 +46,12 @@ class ItemPost(db.Model):
 
 
 class ItemPostSchema(ma.Schema):
-    user = fields.Nested('UserSchema', only=['id', 'username'])
+    title = fields.String(required=True, validate=And(
+        Regexp('^[0-9a-zA-Z ]+$', error='Title must contain only letters, numbers and whitespaces'),
+        Length(min=3, error='Title must be at least 3 characters long')
+    ))
+    status = fields.String(validate=OneOf(VALID_CATEGORIES))
+    user = fields.Nested('UserSchema', only=['id', 'name', 'username'])
     comments = fields.Nested('CommentSchema', many=True, exclude=['item_post'])
     images = fields.Nested('ImageSchema', many=True, exclude=['item_post'])
     seen_location = fields.Nested('LocationSchema')

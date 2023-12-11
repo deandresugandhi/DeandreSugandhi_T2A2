@@ -26,6 +26,6 @@ class Location(db.Model):
         UniqueConstraint('street_number', 'street_name', 'suburb', 'postcode', 'country'),
     )
 
-class CommentSchema(ma.Schema):
+class LocationSchema(ma.Schema):
     class Meta:
         fields = ("id", "street_number", "street_name", "suburb", "postcode", "country")

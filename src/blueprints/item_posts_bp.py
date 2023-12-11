@@ -1,38 +1,43 @@
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from sqlalchemy.exc import IntegrityError
+from marshmallow.exceptions import ValidationError
 from setup import db
 from models.item_post import ItemPost, ItemPostSchema
 from models.location import Location, LocationSchema
 from auth import authorize
 
+
+
 item_posts_bp = Blueprint('item_posts', __name__, url_prefix='/item-posts')
 
-def categorize_location(raw_info):
+def check_location(raw_info):
     def register_location(raw_info, location_attribute):
         if location_attribute not in raw_info:
             return None
         location_data = raw_info[location_attribute]
-        location = Location(
-            street_number = location_data.get('street_number', ''),
-            street_name = location_data.get('street_name', ''),
-            suburb = location_data.get('suburb'),
-            postcode = location_data.get('postcode'),
-            country = location_data.get('country')
-        )
+        location_info = LocationSchema().load(location_data)
+        location = Location(**location_info)
         db.session.add(location)
-        db.session.commit()
+        return location_info
 
+    def retrieve_location(location_info):
+        stmt = db.select(Location).filter_by(**location_info)
+        location = db.session.scalar(stmt)
         return location
 
-    seen_location = register_location(raw_info, 'seen_location')
-    pickup_location = register_location(raw_info, 'pickup_location')
-
-    return seen_location, pickup_location
+    try:
+        seen_location_info = register_location(raw_info, 'seen_location')
+        pickup_location_info = register_location(raw_info, 'pickup_location')
+        db.session.commit()
+    except (IntegrityError, ValidationError) as err:
+        db.session.rollback()
+        return {'error': err.messages}
+    return retrieve_location(seen_location_info), retrieve_location(pickup_location_info)
 
 
 # Get all item posts
 @item_posts_bp.route("/")
-@jwt_required()
 def all_item_posts():
     stmt = db.select(ItemPost)
     item_posts = db.session.scalars(stmt).all()
@@ -42,7 +47,6 @@ def all_item_posts():
 
 # Get one item post
 @item_posts_bp.route('/<int:id>')
-@jwt_required()
 def one_item_post(id):
     stmt = db.select(ItemPost).filter_by(id=id)
     item_post = db.session.scalar(stmt)
@@ -55,7 +59,7 @@ def one_item_post(id):
 @jwt_required()
 def create_item_post():
     item_post_info = ItemPostSchema(exclude=['id', 'date']).load(request.json)
-    seen_location, pickup_location = categorize_location(item_post_info)
+    seen_location, pickup_location = check_location(item_post_info)
     item_post = ItemPost(
         title = item_post_info['title'],
         item_type = item_post_info.get('item_type'),
