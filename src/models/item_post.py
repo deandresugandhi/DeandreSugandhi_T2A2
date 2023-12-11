@@ -1,3 +1,7 @@
+"""
+A module containing the model and schema of an item post record in the database.
+"""
+
 # Standard Library Modules
 from datetime import datetime
 
@@ -9,15 +13,22 @@ from marshmallow.validate import OneOf, Regexp, Length, And
 from setup import db, ma
 
 
+# Defines what is accepted in the categories attribute of the table
 VALID_CATEGORIES = (
     'electronics', 'apparel', 'computers', 
     'jewellery', 'others'
 )
 
 class ItemPost(db.Model):
+    """
+    Creates the table structure of the "item_posts" table using SQLAlchemy.
+    """
     __tablename__ = "item_posts"
 
+    # Primary Key
     id = db.Column(db.Integer, primary_key=True)
+
+    # Attributes
     title = db.Column(db.String(100), nullable=False)
     item_type = db.Column(db.String(10), nullable=False)
     category = db.Column(db.String(30), nullable=False)
@@ -46,6 +57,10 @@ class ItemPost(db.Model):
 
 
 class ItemPostSchema(ma.Schema):
+    """
+    Defines the schema to convert an "item_post" record using Marshmallow
+    into a readable format.
+    """
     title = fields.String(required=True, validate=And(
         Regexp('^[0-9a-zA-Z ]+$', error='Title must contain only letters, numbers and whitespaces'),
         Length(min=3, error='Title must be at least 3 characters long')

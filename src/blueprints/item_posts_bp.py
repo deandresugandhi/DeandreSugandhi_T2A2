@@ -1,11 +1,21 @@
+"""
+A module that defines the blueprint for routes involving records in the 
+"item_posts" table.
+"""
+
+
+# Third-party Library Modules
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from marshmallow.exceptions import ValidationError
+
+# Local Modules
 from setup import db
 from models.item_post import ItemPost, ItemPostSchema
 from models.location import Location, LocationSchema
 from auth import authorize
+from blueprints.comments_bp import comments_bp
 
 
 
@@ -75,3 +85,19 @@ def create_item_post():
     db.session.commit()
     return ItemPostSchema().dump(item_post), 201
 
+# Delete an item post
+@item_posts_bp.route('/<int:id>', methods=['DELETE'])
+@jwt_required()
+def delete_item_post(id):
+    stmt = db.select(ItemPost).filter_by(id=id)
+    item_post = db.session.scalar(stmt)
+    if item_post:
+        authorize(item_post.user_id)
+        db.session.delete(item_post)
+        db.session.commit()
+        return {}, 200
+    else:
+        return {'error': 'Item post not found'}, 404
+
+
+item_posts_bp.register_blueprint(comments_bp)

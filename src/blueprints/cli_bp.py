@@ -1,11 +1,22 @@
+"""
+A module that defines the blueprint for terminal commands modifying the SQL
+database.
+"""
+
+
+# Standard Library Modules
+from datetime import date, datetime
+
+# Third-party Library Modules
 from flask import Blueprint
+
+# Local Modules
 from setup import db, bcrypt
 from models.user import User
 from models.item_post import ItemPost
 from models.comment import Comment
 from models.image import Image
 from models.location import Location
-from datetime import date, datetime
 
 
 db_commands = Blueprint('db', __name__)

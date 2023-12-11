@@ -1,3 +1,8 @@
+"""
+A module that defines the app's settings and how errors are handled globally.
+"""
+
+
 # Standard Library Modules
 from os import environ
 
