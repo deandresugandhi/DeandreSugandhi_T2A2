@@ -30,23 +30,33 @@ def db_create():
 
 @db_commands.cli.command("seed")
 def db_seed():
-
    # Locations
     locations = [
         Location(
-            street_number = 2,
-            street_name = "Muller Lane",
-            suburb = "Mascot",
-            postcode = 2020,
-            country = "Australia"
+            street_number=2,
+            street_name="Muller Lane",
+            suburb="Mascot",
+            state="NSW",
+            postcode=2020,
+            country="Australia"
         ),
         Location(
-            street_number = 1,
-            street_name = "Kensington Road",
-            suburb = "Kensington",
-            postcode = 2033,
-            country = "Australia"
+            unit_number=5,
+            street_number=1,
+            street_name="Kensington Road",
+            suburb="Kensington",
+            state="NSW",
+            postcode=2033,
+            country="Australia"
         ),
+        Location(
+            street_number=8,
+            street_name="Forsyth Street",
+            suburb="Kingsford",
+            state="NSW",
+            postcode=2032,
+            country="Australia"
+        )
     ]
 
     db.session.add_all(locations)
@@ -56,7 +66,7 @@ def db_seed():
     users = [
         User(
             name="admin",
-            username = "admin",
+            username="admin",
             email="admin@spam.com",
             password=bcrypt.generate_password_hash("admin").decode("utf8"),
             is_admin=True,
@@ -82,35 +92,39 @@ def db_seed():
     item_posts = [
         ItemPost(
             title="HP Laptop",
-            item_type = "looking",
-            category = "electronics",
-            item_description = "Black HP laptop, with stickers",
-            retrieval_description = "Please call 0451 123 456 if found",
-            seen_location_id = locations[0].id,
-            pickup_location_id = locations[1].id,
-            status="unclaimed",
-            date = date.today(),
-            user_id = users[1].id
+            post_type="lost",
+            category="electronics",
+            item_description="Black HP laptop, with stickers",
+            retrieval_description="Please call 0451 123 456 if found",
+            status="pending",
+            date=datetime.now().strftime('%Y-%m-%d'),
+            user_id=users[1].id,
+            seen_location_id=locations[0].id,
+            pickup_location_id=locations[1].id,
         ),
         ItemPost(
             title="Black UNIQLO T-Shirt",
-            item_type = "found",
-            category = "apparel",
+            post_type="found",
+            category="apparel",
             item_description="Black t-shirt, with blue decorations",
-            retrieval_description = "Please call me on 0451 123 456 if it is yours",
+            retrieval_description="Please call me on 0451 123 456 if it is yours",
             status="unclaimed",
-            date=date.today(),
-            user_id = users[1].id
+            date=datetime.now().strftime('%Y-%m-%d'),
+            user_id=users[1].id,
+            seen_location_id=locations[0].id,
+            pickup_location_id=locations[1].id
         ),
         ItemPost(
             title="Black Kingston USB Device",
-            item_type = "looking",
+            post_type = "looking",
             category = "Electronics",
             item_description="Black Kingston USB with red decorations",
             retrieval_description = "Please call 0451 234 567 if found",
-            status="pending",
-            date=date.today(),
-            user_id = users[2].id
+            status="claimed",
+            date=datetime.now().strftime('%Y-%m-%d'),
+            user_id=users[2].id,
+            seen_location_id=locations[0].id,
+            pickup_location_id=locations[2].id
         ),
     ]
 
@@ -119,21 +133,22 @@ def db_seed():
 
     comments = [
         Comment(
-            comment_text = "I think I may have found it, is this it? Check the photo",
-            time_stamp = datetime.now(),
+            comment_text="I think I may have found it, is this it? Check the photo.",
+            time_stamp=datetime.utcnow(),
             user_id=users[2].id,
             item_post_id = item_posts[0].id
         ),
         Comment(
-            comment_text = "That's the one, thanks! Where are you located?",
-            time_stamp = datetime.now(),
+            comment_text="That's the one, thanks! Where are you located for pickup?",
+            time_stamp=datetime.utcnow(),
             user_id=users[1].id,
-            item_post_id = item_posts[0].id
+            item_post_id=item_posts[0].id
         ),
         Comment(
-            comment_text = "Comment 1",
-            time_stamp = datetime.now(),
-            user_id=users[1].id,
+            comment_text="No worries, I'll be near your pickup area in Kensington "
+                         "later tomorrow around 6pm, I'll call you by then.",
+            time_stamp=datetime.utcnow(),
+            user_id=users[2].id,
             item_post_id = item_posts[0].id
         )
     ]
@@ -143,19 +158,19 @@ def db_seed():
 
     images = [
         Image(
-            image_url = "image1.png",
+            image_url = "lostlaptop.png",
             item_post_id = item_posts[0].id,
         ),
         Image(
-            image_url = "image2.png",
+            image_url = "lostshirt.png",
             item_post_id = item_posts[1].id,
         ),
         Image(
-            image_url = "image3.png",
+            image_url = "lostusb.png",
             item_post_id = item_posts[2].id,
         ),
         Image(
-            image_url = "image4.png",
+            image_url = "lostlaptop2.png",
             comment_id = comments[0].id,
         ),
     ]

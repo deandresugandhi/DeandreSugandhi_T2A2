@@ -21,17 +21,46 @@ from blueprints.comments_bp import comments_bp
 
 item_posts_bp = Blueprint('item_posts', __name__, url_prefix='/item-posts')
 
+
 def check_location(raw_info):
+    """
+    A function that checks for the locations in an item_post. If the location
+    does not exist yet, the location is registered to the locations table in
+    the db. Otherwise, the location is retrieved from the locations table in
+    the db.
+
+    Args:
+    1. raw_info (dict): The raw_info is a dictionary parsed through a specific
+    schema, with keys that contain a location dictionary.
+    """
     def register_location(raw_info, location_attribute):
+        """
+        Registers the location if it is not already registered into the db.
+
+        Args:
+        1. raw_info (dict): The raw_info is a dictionary parsed through a specific
+        schema, with keys that contain a location dictionary that follows the
+        LocationSchema.
+        2. location_attribute (str): The location attribute refers to either
+        "seen_location" or "pickup_location" key of the raw_info dictionary.
+        """
         if location_attribute not in raw_info:
             return None
         location_data = raw_info[location_attribute]
         location_info = LocationSchema().load(location_data)
         location = Location(**location_info)
+        # Session added but not committed, for error handling purposes.
         db.session.add(location)
         return location_info
 
     def retrieve_location(location_info):
+        """
+        Retrieves the location if it already exists in the db.
+
+        Args:
+        1. location_info (dict): A dictionary parsed through the LocationSchema,
+        containing location information
+        """
         stmt = db.select(Location).filter_by(**location_info)
         location = db.session.scalar(stmt)
         return location
@@ -40,6 +69,9 @@ def check_location(raw_info):
         seen_location_info = register_location(raw_info, 'seen_location')
         pickup_location_info = register_location(raw_info, 'pickup_location')
         db.session.commit()
+    # IntegrityError is raised if unique combination constraint is violated
+    # during commit, ValidationError is raised if the requirements in the
+    # LocationSchema is violated, such as missing required fields
     except (IntegrityError, ValidationError) as err:
         db.session.rollback()
         return {'error': err.messages}
@@ -49,20 +81,24 @@ def check_location(raw_info):
 # Get all item posts
 @item_posts_bp.route("/")
 def all_item_posts():
+    # Selects all item posts from the db
     stmt = db.select(ItemPost)
     item_posts = db.session.scalars(stmt).all()
     if item_posts:
         return ItemPostSchema(many=True).dump(item_posts)
     return {'error': 'No item posts founds'}, 404
 
+
 # Get one item post
 @item_posts_bp.route('/<int:id>')
 def one_item_post(id):
+    # Selects an item post from the db that matches the id
     stmt = db.select(ItemPost).filter_by(id=id)
     item_post = db.session.scalar(stmt)
     if item_post:
         return ItemPostSchema().dump(item_post)
     return {'error': 'Item post not found'}, 404
+
 
 # Create a new item post
 @item_posts_bp.route('/', methods=['POST'])
@@ -84,6 +120,7 @@ def create_item_post():
     db.session.add(item_post)
     db.session.commit()
     return ItemPostSchema().dump(item_post), 201
+
 
 # Delete an item post
 @item_posts_bp.route('/<int:id>', methods=['DELETE'])

@@ -19,6 +19,15 @@ VALID_CATEGORIES = (
     'jewellery', 'others'
 )
 
+VALID_STATUS = (
+    'unclaimed', 'claimed', 'pending'
+)
+
+VALID_POST_TYPE = (
+    'lost', 'found'
+)
+
+
 class ItemPost(db.Model):
     """
     Creates the table structure of the "item_posts" table using SQLAlchemy.
@@ -29,12 +38,12 @@ class ItemPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     # Attributes
-    title = db.Column(db.String(100), nullable=False)
-    item_type = db.Column(db.String(10), nullable=False)
-    category = db.Column(db.String(30), nullable=False)
+    title = db.Column(db.String(80), nullable=False)
+    post_type = db.Column(db.String(10), nullable=False)
+    category = db.Column(db.String(20), nullable=False)
     item_description = db.Column(db.Text)
     retrieval_description = db.Column(db.Text)
-    status = db.Column(db.String(30), nullable=False)
+    status = db.Column(db.String(10), nullable=False, default='unclaimed')
     date = db.Column(db.Date, default=datetime.now().strftime('%Y-%m-%d'))
 
     # Foreign keys
@@ -52,8 +61,12 @@ class ItemPost(db.Model):
     user = db.relationship('User', back_populates='item_posts')
     comments = db.relationship('Comment', back_populates='item_post')
     images = db.relationship('Image', back_populates='item_post')
-    seen_location = db.relationship('Location', back_populates='item_post_seen', foreign_keys=[seen_location_id])
-    pickup_location = db.relationship('Location', back_populates='item_post_pickup', foreign_keys=[pickup_location_id])
+    seen_location = db.relationship('Location',
+        back_populates='item_post_seen',
+        foreign_keys=[seen_location_id])
+    pickup_location = db.relationship('Location',
+        back_populates='item_post_pickup',
+        foreign_keys=[pickup_location_id])
 
 
 class ItemPostSchema(ma.Schema):
@@ -65,7 +78,9 @@ class ItemPostSchema(ma.Schema):
         Regexp('^[0-9a-zA-Z ]+$', error='Title must contain only letters, numbers and whitespaces'),
         Length(min=3, error='Title must be at least 3 characters long')
     ))
-    status = fields.String(validate=OneOf(VALID_CATEGORIES))
+    category = fields.String(required=True, validate=OneOf(VALID_CATEGORIES))
+    post_type = fields.String(load_default='unclaimed', validate=OneOf(VALID_POST_TYPE))
+    status = fields.String(validate=OneOf(VALID_STATUS))
     user = fields.Nested('UserSchema', only=['id', 'name', 'username'])
     comments = fields.Nested('CommentSchema', many=True, exclude=['item_post'])
     images = fields.Nested('ImageSchema', many=True, exclude=['item_post'])
@@ -73,5 +88,6 @@ class ItemPostSchema(ma.Schema):
     pickup_location = fields.Nested('LocationSchema')
 
     class Meta:
-        fields = ("id", "title", "item_type", "category", "item_description", "retrieval_description",
-                  "status", "date", "user", "comments", "images", "seen_location", "pickup_location")
+        fields = ("id", "title", "post_type", "category", "item_description",
+            "retrieval_description", "status", "date", "user", "comments",
+            "images", "seen_location", "pickup_location")

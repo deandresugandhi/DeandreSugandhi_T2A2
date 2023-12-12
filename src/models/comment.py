@@ -2,6 +2,8 @@
 A module containing the model and schema of a comment record in the database.
 """
 
+# Standard Library Modules
+from datetime import datetime
 
 # Third-party Library Modules
 from marshmallow import fields
@@ -21,7 +23,7 @@ class Comment(db.Model):
 
     # Attributes
     comment_text = db.Column(db.Text, nullable=False)
-    time_stamp = db.Column(db.DateTime, nullable=False)
+    time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
 
     # Foreign Keys
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

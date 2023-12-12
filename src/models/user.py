@@ -28,8 +28,12 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
 
     # Relationships
-    item_posts = db.relationship('ItemPost', back_populates='user', cascade='all, delete')
-    comments = db.relationship('Comment', back_populates='user', cascade='all, delete')
+    item_posts = db.relationship('ItemPost',
+        back_populates='user',
+        cascade='all, delete')
+    comments = db.relationship('Comment',
+        back_populates='user',
+        cascade='all, delete')
 
 class UserSchema(ma.Schema):
     """

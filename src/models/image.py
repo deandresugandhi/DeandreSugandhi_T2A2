@@ -34,12 +34,15 @@ class Image(db.Model):
     # Constraint added to the database to ensure each image is associated with
     # either a comment or item_post but not both
     __table_args__ = (
-        CheckConstraint('(item_post_id IS NOT NULL) ^ (comment_id IS NOT NULL)'),
+        CheckConstraint(
+            'NOT((item_post_id IS NULL AND comment_id IS NULL) OR '
+            '(item_post_id IS NOT NULL AND comment_id IS NOT NULL))'
+        ),
     )
 
 class ImageSchema(ma.Schema):
     """
-    Defines the schema to convert a "location" record using Marshmallow into a
+    Defines the schema to convert an "image" record using Marshmallow into a
     readable format.
     """
     item_post = fields.Nested('ItemPostSchema', only=['id', 'title'])
