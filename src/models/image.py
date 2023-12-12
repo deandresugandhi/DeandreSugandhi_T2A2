@@ -5,6 +5,7 @@ A module containing the model and schema of an image record in the database.
 
 # Third-party Library Modules
 from marshmallow import fields
+from sqlalchemy import CheckConstraint
 
 # Local Modules
 from setup import db, ma
@@ -29,6 +30,12 @@ class Image(db.Model):
     # Relationships
     item_post = db.relationship('ItemPost', back_populates='images')
     comment = db.relationship('Comment', back_populates='images')
+
+    # Constraint added to the database to ensure each image is associated with
+    # either a comment or item_post but not both
+    __table_args__ = (
+        CheckConstraint('(item_post_id IS NOT NULL) ^ (comment_id IS NOT NULL)'),
+    )
 
 class ImageSchema(ma.Schema):
     """
