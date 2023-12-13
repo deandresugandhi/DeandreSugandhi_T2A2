@@ -45,4 +45,5 @@ class UserSchema(ma.Schema):
     item_posts = fields.Nested('ItemPostSchema', only=['id', 'title'], many=True)
 
     class Meta:
+        ordered = True
         fields = ("id", "name", "username", "email", "password", "is_admin", "item_posts")

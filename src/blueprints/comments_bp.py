@@ -11,6 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 # Local Modules
 from setup import db
 from models.comment import CommentSchema, Comment
+from models.image import Image, ImageSchema
 from auth import authorize
 
 
@@ -28,22 +29,37 @@ def create_comment(item_post_id):
     )
     db.session.add(comment)
     db.session.commit()
+
+    # Create attached image records and associate them with the created comment
+    if comment_info.get("images", ""):
+        for image in comment_info.get("images"):
+            image_info = ImageSchema(only=["image_url"]).load(image)
+            if image_info:
+                attached_image = Image(
+                    image_url=image.get("image_url"),
+                    comment_id=image.get("comment_id")
+                )
+                db.session.add(attached_image)
+                db.session.commit()
+
     return CommentSchema().dump(comment), 201
+
 
 # Edit a comment
 @comments_bp.route('/<int:comment_id>', methods=['PUT', 'PATCH'])
 @jwt_required()
 def update_comment(item_post_id, comment_id):
-    comment_info = CommentSchema(only=['message']).load(request.json)
-    stmt = db.select(Comment).filter_by(id=comment_id) # .where(Comment.id == id)
+    comment_info = CommentSchema(only=['comment_text']).load(request.json)
+    stmt = db.select(Comment).filter_by(id=comment_id)
     comment = db.session.scalar(stmt)
     if comment:
         authorize(comment.user_id)
-        comment.message = comment_info.get('message', comment.message)
+        comment.comment_text = comment_info.get('comment_text', comment.comment_text)
         db.session.commit()
-        return CommentSchema().dump(comment)
+        return CommentSchema().dump(comment), 201
     else:
         return {'error': 'Comment not found'}, 404
+
 
 # Delete a comment
 @comments_bp.route('/<int:comment_id>', methods=['DELETE'])

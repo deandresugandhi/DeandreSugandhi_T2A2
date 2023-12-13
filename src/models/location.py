@@ -55,5 +55,6 @@ class LocationSchema(ma.Schema):
         validate=Length(equal=4, error="Postcode can only be 4 characters long"))
     country = fields.String(required=True)
     class Meta:
+        ordered = True
         fields = ("id", "unit_number", "street_number", "street_name",
                   "suburb", "state", "postcode", "country")

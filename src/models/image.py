@@ -49,4 +49,5 @@ class ImageSchema(ma.Schema):
     comment = fields.Nested('CommentSchema', only=['id'])
 
     class Meta:
+        ordered = True
         fields = ("id", "image_url", "item_post", "comment")

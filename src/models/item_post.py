@@ -83,11 +83,12 @@ class ItemPostSchema(ma.Schema):
     status = fields.String(validate=OneOf(VALID_STATUS))
     user = fields.Nested('UserSchema', only=['id', 'name', 'username'])
     comments = fields.Nested('CommentSchema', many=True, exclude=['item_post'])
-    images = fields.Nested('ImageSchema', many=True, exclude=['item_post'])
     seen_location = fields.Nested('LocationSchema')
     pickup_location = fields.Nested('LocationSchema')
+    images = fields.Nested('ImageSchema', many=True, exclude=['item_post', 'comment'])
 
     class Meta:
+        ordered = True
         fields = ("id", "title", "post_type", "category", "item_description",
             "retrieval_description", "status", "date", "user", "comments",
-            "images", "seen_location", "pickup_location")
+            "seen_location", "pickup_location", "images")

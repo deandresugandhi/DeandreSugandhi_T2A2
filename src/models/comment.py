@@ -41,6 +41,8 @@ class CommentSchema(ma.Schema):
     """
     user = fields.Nested('UserSchema', only=['id', 'username'])
     item_post = fields.Nested('ItemPostSchema', only=['id'])
+    images = fields.Nested('ImageSchema', many=True, exclude=['item_post', 'comment'])
 
     class Meta:
-        fields = ("id", "comment_text", "time_stamp", "user", "item_post")
+        ordered = True
+        fields = ("id", "comment_text", "time_stamp", "user", "image", "item_post")

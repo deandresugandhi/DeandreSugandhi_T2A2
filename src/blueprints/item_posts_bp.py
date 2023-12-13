@@ -8,12 +8,14 @@ A module that defines the blueprint for routes involving records in the
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import desc
 from marshmallow.exceptions import ValidationError
 
 # Local Modules
 from setup import db
 from models.item_post import ItemPost, ItemPostSchema
 from models.location import Location, LocationSchema
+from models.image import Image, ImageSchema
 from auth import authorize
 from blueprints.comments_bp import comments_bp
 
@@ -82,7 +84,19 @@ def check_location(raw_info):
 @item_posts_bp.route("/")
 def all_item_posts():
     # Selects all item posts from the db
-    stmt = db.select(ItemPost)
+    stmt = db.select(ItemPost).order_by(desc('date'))
+    item_posts = db.session.scalars(stmt).all()
+    if item_posts:
+        return ItemPostSchema(many=True).dump(item_posts)
+    return {'error': 'No item posts founds'}, 404
+
+
+# Searches for item posts that matches certain query parameters
+@item_posts_bp.route("/<string:field>/<string:keyword>")
+def search_posts(field, keyword):
+    field = getattr(ItemPost, field.lower())
+    # Selects all item posts from the db
+    stmt = db.select(ItemPost).filter_by(field.ilike(f"%{keyword}%"))
     item_posts = db.session.scalars(stmt).all()
     if item_posts:
         return ItemPostSchema(many=True).dump(item_posts)
@@ -104,7 +118,9 @@ def one_item_post(id):
 @item_posts_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_item_post():
+    # Parses incoming POST request body through ItemPostSchema
     item_post_info = ItemPostSchema(exclude=['id', 'date']).load(request.json)
+    # Retrieve location information
     seen_location, pickup_location = check_location(item_post_info)
     item_post = ItemPost(
         title = item_post_info['title'],
@@ -115,10 +131,23 @@ def create_item_post():
         status = item_post_info.get('status', 'Unclaimed'),
         user_id = get_jwt_identity(),
         seen_location_id = seen_location.id,
-        pickup_location_id = pickup_location.id
+        pickup_location_id = pickup_location.id,
     )
     db.session.add(item_post)
     db.session.commit()
+
+    # Create attached image records and associate them with the created item post
+    if item_post_info.get("images", ""):
+        for image in item_post_info.get("images"):
+            image_info = ImageSchema(only=["image_url"]).load(image)
+            if image_info:
+                attached_image = Image(
+                    image_url=image.get("image_url"),
+                    item_post_id=image.get("comment_id")
+                )
+                db.session.add(attached_image)
+                db.session.commit()
+
     return ItemPostSchema().dump(item_post), 201
 
 
