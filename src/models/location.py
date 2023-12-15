@@ -4,7 +4,7 @@ A module containing the model and schema of a location record in the database.
 
 
 # Third-party Library Modules
-from marshmallow import fields
+from marshmallow import fields, validates, ValidationError
 from sqlalchemy import UniqueConstraint
 
 # Local Modules
@@ -55,6 +55,17 @@ class LocationSchema(ma.Schema):
     state = fields.String(required=True)
     postcode = fields.Integer(required=True)
     country = fields.String(required=True)
+
+    @validates('unit_number')
+    def validate_unit_number(self, value):
+        if value and not value.isdigit():
+            raise ValidationError('Unit number must contain only digits.')
+
+    @validates('street_number')
+    def validate_street_number(self, value):
+        if value and not value.isdigit():
+            raise ValidationError('Street number must contain only digits.')
+
     class Meta:
         ordered = True
         fields = ("id", "unit_number", "street_number", "street_name",

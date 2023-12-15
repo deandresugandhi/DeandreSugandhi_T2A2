@@ -22,7 +22,7 @@ class User(db.Model):
 
     # Attributes
     name = db.Column(db.String, nullable=False)
-    username = db.Column(db.String, nullable=False, unique=True)
+    username = db.Column(db.String(20), nullable=False, unique=True)
     email = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
@@ -43,15 +43,18 @@ class UserSchema(ma.Schema):
     readable format.
     """
     username = fields.String(
-        require = True,
+        required = True,
         validate = And(
-            Length(min=5, max=20, error="Username must be between 5 and 20 characters"),
+            Length(min=5, max=20, error="Username must be between 5 and 20 characters."),
             Regexp('^[0-9a-zA-Z _]+$', error='Username must contain only letters, '
-                   'numbers, whitespaces, and underscores')
+                   'numbers, whitespaces, and underscores.')
         )
     )
     email = fields.Email(required=True)
-    password = fields.String(required=True, validate=Length(min=8))
+    password = fields.String(
+        required=True,
+        validate=Length(min=8, error="Password must be at least 8 characters long."),
+    )
     item_posts = fields.Nested(
         'ItemPostSchema',
         only=['id', 'title', 'status', 'post_type', 'images'],

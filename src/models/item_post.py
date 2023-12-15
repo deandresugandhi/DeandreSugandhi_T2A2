@@ -100,13 +100,25 @@ class ItemPostSchema(ma.Schema):
     Defines the schema to convert an "item_post" record using Marshmallow
     into a readable format.
     """
-    title = fields.String(required=True, validate=And(
-        Regexp('^[0-9a-zA-Z -]+$', error='Title must contain only letters, numbers and whitespaces'),
-        Length(min=3, error='Title must be at least 3 characters long')
-    ))
-    category = fields.String(required=True, validate=OneOf(VALID_CATEGORIES))
-    post_type = fields.String(load_default='unclaimed', validate=OneOf(VALID_POST_TYPE))
-    status = fields.String(validate=OneOf(VALID_STATUS))
+    title = fields.String(
+        required=True,
+        validate=And(
+            Regexp('^[0-9a-zA-Z -]+$', error='Title must contain only letters, numbers and whitespaces'),
+            Length(min=3, error='Title must be at least 3 characters long')
+        )
+    )
+    post_type = fields.String(
+        required=True,
+        validate=OneOf(VALID_POST_TYPE)
+    )
+    category = fields.String(
+        required=True,
+        validate=OneOf(VALID_CATEGORIES)
+    )
+    status = fields.String(
+        load_default='unclaimed',
+        validate=OneOf(VALID_STATUS)
+    )
     user = fields.Nested('UserSchema', only=['id', 'name', 'username'])
     comments = fields.Nested('CommentSchema', many=True, exclude=['item_post'])
     seen_location = fields.Nested('LocationSchema')

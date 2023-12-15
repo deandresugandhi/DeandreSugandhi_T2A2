@@ -33,6 +33,10 @@ def unauthorized(err):
 def bad_request(err):
     return {'error': str(err)}, 400
 
+@app.errorhandler(404)
+def bad_request(err):
+    return {'error': str(err)}, 404
+
 @app.errorhandler(ValidationError)
 def validation_error(err):
     return {'error': err.messages}, 400
@@ -41,9 +45,9 @@ def validation_error(err):
 def integrity_error(err):
     return {'error': err.messages}, 409
 
-# @app.errorhandler(ValueError)
-# def value_error(err):
-#     return {'error': str(err)}
+@app.errorhandler(ValueError)
+def value_error(err):
+    return {'error': str(err)}, 400
 
 @app.errorhandler(AttributeError)
 def attribute_error(err):

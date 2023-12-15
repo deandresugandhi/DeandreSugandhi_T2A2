@@ -94,6 +94,6 @@ def clear_attached_images(record, model):
     model_id = model + "_id"
     stmt = db.select(Image).filter(getattr(Image, model_id) == record.id)
     attached_images = db.session.scalars(stmt).all()
-    db.session.delete(attached_images)
+    for image in attached_images:
+        db.session.delete(image)
     db.session.commit()
-

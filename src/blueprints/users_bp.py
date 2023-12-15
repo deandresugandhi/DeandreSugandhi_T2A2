@@ -9,7 +9,7 @@ from datetime import timedelta
 # Third-party Library Modules
 from flask import Blueprint, request
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required
 
 # Local Modules
 from models.user import User, UserSchema
@@ -66,7 +66,7 @@ def login():
     if user and bcrypt.check_password_hash(user.password, request.json["password"]):
         # Create and return a JWT token if password hash matches
         token = create_access_token(identity=user.id, expires_delta=timedelta(hours=2))
-        return {'token': token, 'user': UserSchema(exclude=["password", 'item_posts']).dump(user)}
+        return {'token': token, 'user': UserSchema(exclude=["password", 'item_posts']).dump(user)}, 202
     # Returns error if password does not match
     else:
         return {"error": "Invalid email, username, or password"}, 401
@@ -81,7 +81,7 @@ def all_users():
     users = db.session.scalars(stmt).all()
     # Return all users, or error if no users are found
     if users:
-        return UserSchema(many=True, exclude=['password']).dump(users)
+        return UserSchema(many=True, exclude=['password']).dump(users), 200
     return {'error': 'No users found'}, 404
 
 
@@ -93,7 +93,7 @@ def one_user(id):
     user = db.session.scalar(stmt)
     # Returns the user, or error if the user is not found
     if user:
-        return UserSchema(exclude=['password']).dump(user)
+        return UserSchema(exclude=['password']).dump(user), 200
     return {'error': 'User not found'}, 404
 
 
@@ -121,7 +121,7 @@ def update_user(id):
                     authorize()
                     user.is_admin = value
             db.session.commit()
-            return UserSchema(exclude=['password']).dump(user), 200
+            return UserSchema(exclude=['password']).dump(user), 201
         # IntegrityError is raised if username / email is not unique to the record,
         # and handled appropriately
         except IntegrityError:

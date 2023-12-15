@@ -14,7 +14,8 @@ from setup import db
 from models.item_post import ItemPost, ItemPostSchema
 from auth import authorize
 from blueprints.comments_bp import comments_bp
-from utilities import check_location, attach_image
+from blueprints.locations_bp import locations_bp
+from utilities import check_location, attach_image, clear_attached_images
 
 
 item_posts_bp = Blueprint('item_posts', __name__, url_prefix='/item-posts')
@@ -28,7 +29,7 @@ def all_item_posts():
     item_posts = db.session.scalars(stmt).all()
     # Returns all item posts, or error if none are found
     if item_posts:
-        return ItemPostSchema(many=True).dump(item_posts)
+        return ItemPostSchema(many=True).dump(item_posts), 200
     return {'error': 'No item posts founds'}, 404
 
 
@@ -42,7 +43,7 @@ def search_posts(field, keyword):
         item_posts = db.session.scalars(stmt).all()
         # Returns the matching item posts, or error if none are found
         if item_posts:
-            return ItemPostSchema(many=True).dump(item_posts)
+            return ItemPostSchema(many=True).dump(item_posts), 200
         return {'error': 'No item posts found'}, 404
     else:
         return {'error': 'Invalid field'}, 404
@@ -56,7 +57,7 @@ def one_item_post(id):
     item_post = db.session.scalar(stmt)
     # Returns the item post, or error if the item post is not found
     if item_post:
-        return ItemPostSchema().dump(item_post)
+        return ItemPostSchema().dump(item_post), 200
     return {'error': 'Item post not found'}, 404
 
 
@@ -76,8 +77,8 @@ def create_item_post():
         retrieval_description = item_post_info.get('retrieval_description', ''),
         status = item_post_info.get('status', 'unclaimed'),
         user_id = get_jwt_identity(),
-        seen_location_id = seen_location.id,
-        pickup_location_id = pickup_location.id,
+        seen_location_id = seen_location.id if seen_location else None,
+        pickup_location_id = pickup_location.id if pickup_location else None,
     )
     db.session.add(item_post)
     db.session.commit()
@@ -86,6 +87,34 @@ def create_item_post():
     attach_image(item_post_info, item_post, "item_post")
 
     return ItemPostSchema().dump(item_post), 201
+
+
+# Edit an item post
+@item_posts_bp.route('/<int:id>', methods=['PUT', 'PATCH'])
+@jwt_required()
+def edit_item_post(id):
+    # Parses incoming POST request body through ItemPostSchema
+    item_post_info = ItemPostSchema(exclude=['id', 'date', 'user', 'comments']).load(request.json)
+    # Select item post matching id params from URL query
+    stmt = db.select(ItemPost).filter_by(id=id)
+    item_post = db.session.scalar(stmt)
+    if item_post:
+        authorize(item_post.user_id)
+        # Apply edit to item post
+        for field, value in item_post_info.items():
+            if field == 'images':
+                clear_attached_images(item_post, "item_post")
+                attach_image(item_post_info, item_post, "item_post")
+            elif field in ['seen_location', 'pickup_location']:
+                seen_location, pickup_location = check_location(item_post_info)
+                item_post.seen_location_id = seen_location.id if seen_location else item_post.seen_location_id
+                item_post.pickup_location_id = pickup_location.id if pickup_location else item_post.pickup_location_id
+            else:
+                setattr(item_post, field, value)
+        db.session.commit()
+        return ItemPostSchema().dump(item_post), 201
+    else:
+        return {'error': 'Item post not found'}, 404
 
 
 # Delete an item post
@@ -104,4 +133,6 @@ def delete_item_post(id):
         return {'error': 'Item post not found'}, 404
 
 
+
 item_posts_bp.register_blueprint(comments_bp)
+item_posts_bp.register_blueprint(locations_bp)
