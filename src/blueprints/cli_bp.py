@@ -68,20 +68,20 @@ def db_seed():
             name="admin",
             username="admin",
             email="admin@spam.com",
-            password=bcrypt.generate_password_hash("admin").decode("utf8"),
+            password=bcrypt.generate_password_hash("admin123").decode("utf8"),
             is_admin=True,
         ),
         User(
             name="John Doe",
             username="johndoe",
             email="johndoe@spam.com",
-            password=bcrypt.generate_password_hash("johndoe").decode("utf8"),
+            password=bcrypt.generate_password_hash("johndoe123").decode("utf8"),
         ),
         User(
             name="Jane Doe",
             username="janedoe",
             email="janedoe@spam.com",
-            password=bcrypt.generate_password_hash("janedoe").decode("utf8"),
+            password=bcrypt.generate_password_hash("janedoe123").decode("utf8"),
         ),
     ]
 

@@ -5,79 +5,19 @@ A module that defines the blueprint for routes involving records in the
 
 
 # Third-party Library Modules
-from flask import Blueprint, request, abort
+from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
-from marshmallow.exceptions import ValidationError
 
 # Local Modules
 from setup import db
 from models.item_post import ItemPost, ItemPostSchema
-from models.location import Location, LocationSchema
-from models.image import Image, ImageSchema
 from auth import authorize
 from blueprints.comments_bp import comments_bp
-
+from utilities import check_location, attach_image
 
 
 item_posts_bp = Blueprint('item_posts', __name__, url_prefix='/item-posts')
-
-
-def check_location(raw_info):
-    """
-    A function that checks for the locations in an item_post. If the location
-    does not exist yet, the location is registered to the locations table in
-    the db. Otherwise, the location is retrieved from the locations table in
-    the db.
-
-    Args:
-    1. raw_info (dict): The raw_info is a dictionary parsed through a specific
-    schema, with keys that contain a location dictionary.
-    """
-    def register_location(raw_info, location_attribute):
-        """
-        Registers the location if it is not already registered into the db.
-
-        Args:
-        1. raw_info (dict): The raw_info is a dictionary parsed through a specific
-        schema, with keys that contain a location dictionary that follows the
-        LocationSchema.
-        2. location_attribute (str): The location attribute refers to either
-        "seen_location" or "pickup_location" key of the raw_info dictionary.
-        """
-        if location_attribute not in raw_info:
-            return None
-        location_data = raw_info[location_attribute]
-        location_info = LocationSchema().load(location_data)
-        location = Location(**location_info)
-        # Session added but not committed, for error handling purposes.
-        db.session.add(location)
-        return location_info
-
-    def retrieve_location(location_info):
-        """
-        Retrieves the location if it already exists in the db.
-
-        Args:
-        1. location_info (dict): A dictionary parsed through the LocationSchema,
-        containing location information
-        """
-        stmt = db.select(Location).filter_by(**location_info)
-        location = db.session.scalar(stmt)
-        return location
-
-    try:
-        seen_location_info = register_location(raw_info, 'seen_location')
-        pickup_location_info = register_location(raw_info, 'pickup_location')
-        db.session.commit()
-    # IntegrityError is raised if unique combination constraint is violated
-    # during commit, ValidationError is raised if the requirements in the
-    # LocationSchema is violated, such as missing required fields
-    except (IntegrityError, ValidationError) as err:
-        db.session.rollback()
-        return {'error': err.messages}
-    return retrieve_location(seen_location_info), retrieve_location(pickup_location_info)
 
 
 # Get all item posts
@@ -86,6 +26,7 @@ def all_item_posts():
     # Selects all item posts from the db
     stmt = db.select(ItemPost).order_by(desc('date'))
     item_posts = db.session.scalars(stmt).all()
+    # Returns all item posts, or error if none are found
     if item_posts:
         return ItemPostSchema(many=True).dump(item_posts)
     return {'error': 'No item posts founds'}, 404
@@ -94,13 +35,17 @@ def all_item_posts():
 # Searches for item posts that matches certain query parameters
 @item_posts_bp.route("/<string:field>/<string:keyword>")
 def search_posts(field, keyword):
-    field = getattr(ItemPost, field.lower())
-    # Selects all item posts from the db
-    stmt = db.select(ItemPost).filter_by(field.ilike(f"%{keyword}%"))
-    item_posts = db.session.scalars(stmt).all()
-    if item_posts:
-        return ItemPostSchema(many=True).dump(item_posts)
-    return {'error': 'No item posts founds'}, 404
+    if field in ('title', 'post_type', 'category', 'status', 'date'):
+        field = getattr(ItemPost, field.lower())
+        # Selects item posts based on the field and keyword params from URI query
+        stmt = db.select(ItemPost).filter(field.ilike(f"%{keyword}%"))
+        item_posts = db.session.scalars(stmt).all()
+        # Returns the matching item posts, or error if none are found
+        if item_posts:
+            return ItemPostSchema(many=True).dump(item_posts)
+        return {'error': 'No item posts found'}, 404
+    else:
+        return {'error': 'Invalid field'}, 404
 
 
 # Get one item post
@@ -109,6 +54,7 @@ def one_item_post(id):
     # Selects an item post from the db that matches the id
     stmt = db.select(ItemPost).filter_by(id=id)
     item_post = db.session.scalar(stmt)
+    # Returns the item post, or error if the item post is not found
     if item_post:
         return ItemPostSchema().dump(item_post)
     return {'error': 'Item post not found'}, 404
@@ -120,15 +66,15 @@ def one_item_post(id):
 def create_item_post():
     # Parses incoming POST request body through ItemPostSchema
     item_post_info = ItemPostSchema(exclude=['id', 'date']).load(request.json)
-    # Retrieve location information
+    # Retrieve location information from parsed request
     seen_location, pickup_location = check_location(item_post_info)
     item_post = ItemPost(
         title = item_post_info['title'],
-        item_type = item_post_info.get('item_type'),
-        category = item_post_info.get('category'),
+        post_type = item_post_info.get('post_type').lower(),
+        category = item_post_info.get('category').lower(),
         item_description = item_post_info.get('item_description', ''),
         retrieval_description = item_post_info.get('retrieval_description', ''),
-        status = item_post_info.get('status', 'Unclaimed'),
+        status = item_post_info.get('status', 'unclaimed'),
         user_id = get_jwt_identity(),
         seen_location_id = seen_location.id,
         pickup_location_id = pickup_location.id,
@@ -137,16 +83,7 @@ def create_item_post():
     db.session.commit()
 
     # Create attached image records and associate them with the created item post
-    if item_post_info.get("images", ""):
-        for image in item_post_info.get("images"):
-            image_info = ImageSchema(only=["image_url"]).load(image)
-            if image_info:
-                attached_image = Image(
-                    image_url=image.get("image_url"),
-                    item_post_id=image.get("comment_id")
-                )
-                db.session.add(attached_image)
-                db.session.commit()
+    attach_image(item_post_info, item_post, "item_post")
 
     return ItemPostSchema().dump(item_post), 201
 
@@ -155,6 +92,7 @@ def create_item_post():
 @item_posts_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
 def delete_item_post(id):
+    # Select item post matching id param from URL query
     stmt = db.select(ItemPost).filter_by(id=id)
     item_post = db.session.scalar(stmt)
     if item_post:

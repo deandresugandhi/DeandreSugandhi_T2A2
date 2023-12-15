@@ -32,7 +32,13 @@ class Comment(db.Model):
     # Relationships
     user = db.relationship('User', back_populates='comments')
     item_post = db.relationship('ItemPost', back_populates='comments')
-    images = db.relationship('Image', back_populates='comment')
+    images = db.relationship(
+        'Image',
+        back_populates='comment',
+        # Deletes and update all its associated comments when an item post is 
+        # deleted or updated
+        cascade='all, delete'
+    )
 
 class CommentSchema(ma.Schema):
     """
@@ -45,4 +51,4 @@ class CommentSchema(ma.Schema):
 
     class Meta:
         ordered = True
-        fields = ("id", "comment_text", "time_stamp", "user", "image", "item_post")
+        fields = ("id", "comment_text", "time_stamp", "user", "images", "item_post")

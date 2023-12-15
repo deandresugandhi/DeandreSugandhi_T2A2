@@ -27,12 +27,24 @@ jwt = JWTManager(app)
 
 @app.errorhandler(401)
 def unauthorized(err):
-    return {'error': 'You are not authorized to access this resource'}
+    return {'error': 'You are not authorized to access this resource'}, 401
+
+@app.errorhandler(400)
+def bad_request(err):
+    return {'error': str(err)}, 400
 
 @app.errorhandler(ValidationError)
 def validation_error(err):
-    return {'error': err.messages}
+    return {'error': err.messages}, 400
 
 @app.errorhandler(IntegrityError)
 def integrity_error(err):
-    return {'error': err.messages}
+    return {'error': err.messages}, 409
+
+# @app.errorhandler(ValueError)
+# def value_error(err):
+#     return {'error': str(err)}
+
+@app.errorhandler(AttributeError)
+def attribute_error(err):
+    return {'error': str(err)}, 404

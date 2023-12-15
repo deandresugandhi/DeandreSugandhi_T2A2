@@ -6,7 +6,6 @@ A module containing the model and schema of a location record in the database.
 # Third-party Library Modules
 from marshmallow import fields
 from sqlalchemy import UniqueConstraint
-from marshmallow.validate import Length
 
 # Local Modules
 from setup import db, ma
@@ -23,9 +22,9 @@ class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     # Attributes
-    unit_number = db.Column(db.Integer)
-    street_number = db.Column(db.Integer)
-    street_name = db.Column(db.String)
+    unit_number = db.Column(db.String, default="")
+    street_number = db.Column(db.String, default="")
+    street_name = db.Column(db.String, default="")
     suburb = db.Column(db.String, nullable=False)
     state = db.Column(db.String, nullable=False)
     postcode = db.Column(db.Integer, nullable=False)
@@ -40,8 +39,8 @@ class Location(db.Model):
         foreign_keys=[ItemPost.pickup_location_id])
 
     # Unique Constraint Combination
-    _table_args__ = (
-        UniqueConstraint('street_number', 'street_name', 'suburb', 'postcode', 'country'),
+    __table_args__ = (
+        UniqueConstraint("unit_number", "street_number", "street_name", "suburb", "state", "postcode", "country"),
     )
 
 class LocationSchema(ma.Schema):
@@ -49,10 +48,12 @@ class LocationSchema(ma.Schema):
     Defines the schema to convert a "location" record using Marshmallow into a
     readable format.
     """
+    unit_number = fields.String(load_default="")
+    street_number = fields.String(load_default="")
+    street_name = fields.String(load_default="")
     suburb = fields.String(required=True)
     state = fields.String(required=True)
-    postcode = fields.Integer(required=True,
-        validate=Length(equal=4, error="Postcode can only be 4 characters long"))
+    postcode = fields.Integer(required=True)
     country = fields.String(required=True)
     class Meta:
         ordered = True

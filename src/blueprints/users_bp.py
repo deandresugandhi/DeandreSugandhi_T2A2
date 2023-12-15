@@ -40,7 +40,7 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        # Return the new user information, without the password
+        # Returns the new user information, without the password
         return UserSchema(exclude=["password"]).dump(user), 201
     except IntegrityError:
         return {"error": "Username or email address already in use"}, 409
@@ -50,7 +50,8 @@ def register():
 @users_bp.route("/login", methods=["POST"])
 def login():
     # Get either username or email from the POST body
-    username_or_email = request.json.get("username") or request.json.get("email")
+    user_info = UserSchema(only=['username', 'email', 'password']).load(request.json, partial=True)
+    username_or_email = user_info.get("username") or user_info.get("email")
     # Checks if user provided either a username or email
     if username_or_email:
         stmt = (
@@ -60,13 +61,13 @@ def login():
         )
         user = db.session.scalar(stmt)
     else:
-        return {"error": "Username or email is required"}
+        return {"error": "Username or email is required"}, 400
     # Checks if password hash matches the specified user in the db
     if user and bcrypt.check_password_hash(user.password, request.json["password"]):
         # Create and return a JWT token if password hash matches
         token = create_access_token(identity=user.id, expires_delta=timedelta(hours=2))
         return {'token': token, 'user': UserSchema(exclude=["password", 'item_posts']).dump(user)}
-    # Return error if password does not match
+    # Returns error if password does not match
     else:
         return {"error": "Invalid email, username, or password"}, 401
 
@@ -78,8 +79,9 @@ def all_users():
     # Select all users in the db
     stmt = db.select(User)
     users = db.session.scalars(stmt).all()
+    # Return all users, or error if no users are found
     if users:
-        return UserSchema(many=True).dump(users)
+        return UserSchema(many=True, exclude=['password']).dump(users)
     return {'error': 'No users found'}, 404
 
 
@@ -89,8 +91,9 @@ def one_user(id):
     # Select user that matches the specified id
     stmt = db.select(User).filter_by(id=id)
     user = db.session.scalar(stmt)
+    # Returns the user, or error if the user is not found
     if user:
-        return UserSchema().dump(user)
+        return UserSchema(exclude=['password']).dump(user)
     return {'error': 'User not found'}, 404
 
 
@@ -99,7 +102,7 @@ def one_user(id):
 @jwt_required()
 def update_user(id):
     # Parses incoming PUT or PATCH request body through the UserSchema
-    user_info = UserSchema.load(request.json, partial=True)
+    user_info = UserSchema().load(request.json, partial=True)
     stmt = db.select(User).filter_by(id=id)
     user = db.session.scalar(stmt)
     if user:
@@ -119,6 +122,8 @@ def update_user(id):
                     user.is_admin = value
             db.session.commit()
             return UserSchema(exclude=['password']).dump(user), 200
+        # IntegrityError is raised if username / email is not unique to the record,
+        # and handled appropriately
         except IntegrityError:
             return {'error': 'Username or email already in use'}
     else:
@@ -129,10 +134,11 @@ def update_user(id):
 @users_bp.route("/<int:user_id>", methods=['DELETE'])
 @jwt_required()
 def delete_user(user_id):
+    # Select user that matches the specified id
     stmt = db.select(User).filter_by(id=user_id)
     user = db.session.scalar(stmt)
     if user:
-        authorize(user_id)
+        authorize()
         db.session.delete(user)
         db.session.commit()
         return {}, 200

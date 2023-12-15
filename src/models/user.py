@@ -5,7 +5,7 @@ A module containing the model and schema of a user record in the database.
 
 # Third-party Library Modules
 from marshmallow import fields
-from marshmallow.validate import Length
+from marshmallow.validate import Length, And, Regexp
 
 # Local Modules
 from setup import db, ma
@@ -30,19 +30,33 @@ class User(db.Model):
     # Relationships
     item_posts = db.relationship('ItemPost',
         back_populates='user',
-        cascade='all, delete')
+        cascade='all, delete'
+    )
     comments = db.relationship('Comment',
         back_populates='user',
-        cascade='all, delete')
+        cascade='all, delete'
+    )
 
 class UserSchema(ma.Schema):
     """
     Defines the schema to convert a "user" record using Marshmallow into a 
     readable format.
     """
+    username = fields.String(
+        require = True,
+        validate = And(
+            Length(min=5, max=20, error="Username must be between 5 and 20 characters"),
+            Regexp('^[0-9a-zA-Z _]+$', error='Username must contain only letters, '
+                   'numbers, whitespaces, and underscores')
+        )
+    )
     email = fields.Email(required=True)
     password = fields.String(required=True, validate=Length(min=8))
-    item_posts = fields.Nested('ItemPostSchema', only=['id', 'title'], many=True)
+    item_posts = fields.Nested(
+        'ItemPostSchema',
+        only=['id', 'title', 'status', 'post_type', 'images'],
+        many=True
+    )
 
     class Meta:
         ordered = True

@@ -6,6 +6,7 @@ A module containing the model and schema of an image record in the database.
 # Third-party Library Modules
 from marshmallow import fields
 from sqlalchemy import CheckConstraint
+from marshmallow.validate import Length
 
 # Local Modules
 from setup import db, ma
@@ -24,7 +25,10 @@ class Image(db.Model):
     image_url = db.Column(db.String, nullable=False)
 
     # Foreign Keys
-    item_post_id = db.Column(db.Integer, db.ForeignKey('item_posts.id'))
+    item_post_id = db.Column(
+        db.Integer,
+        db.ForeignKey('item_posts.id'),
+    )
     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
 
     # Relationships
@@ -45,6 +49,10 @@ class ImageSchema(ma.Schema):
     Defines the schema to convert an "image" record using Marshmallow into a
     readable format.
     """
+    image_url = fields.String(
+        required=True,
+        validate=Length(min=1, error="URL cannot be blank")
+    )
     item_post = fields.Nested('ItemPostSchema', only=['id', 'title'])
     comment = fields.Nested('CommentSchema', only=['id'])
 

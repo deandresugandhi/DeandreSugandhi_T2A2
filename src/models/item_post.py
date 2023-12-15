@@ -47,26 +47,52 @@ class ItemPost(db.Model):
     date = db.Column(db.Date, default=datetime.now().strftime('%Y-%m-%d'))
 
     # Foreign keys
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=False,
+    )
     seen_location_id = db.Column(
         db.Integer,
-        db.ForeignKey('locations.id'),
+        db.ForeignKey(
+            'locations.id',
+            # Set this key to NULL if referred location is deleted
+            ondelete='SET NULL'
+        )
     )
     pickup_location_id = db.Column(
         db.Integer,
-        db.ForeignKey('locations.id'),
+        db.ForeignKey(
+            'locations.id',
+            # Set this key to NULL if referred location is deleted
+            ondelete='SET NULL'
+        )
     )
 
     # Relationships
     user = db.relationship('User', back_populates='item_posts')
-    comments = db.relationship('Comment', back_populates='item_post')
-    images = db.relationship('Image', back_populates='item_post')
+    comments = db.relationship(
+        'Comment',
+        back_populates='item_post',
+        # Deletes or updates all its associated comments when an item post is
+        # deleted or updated
+        cascade='all, delete'
+    )
+    images = db.relationship(
+        'Image',
+        back_populates='item_post',
+        # Deletes or updates all its associated images when an item post is
+        # deleted or updated
+        cascade='all, delete'
+    )
     seen_location = db.relationship('Location',
         back_populates='item_post_seen',
-        foreign_keys=[seen_location_id])
+        foreign_keys=[seen_location_id]
+    )
     pickup_location = db.relationship('Location',
         back_populates='item_post_pickup',
-        foreign_keys=[pickup_location_id])
+        foreign_keys=[pickup_location_id]
+    )
 
 
 class ItemPostSchema(ma.Schema):
@@ -75,7 +101,7 @@ class ItemPostSchema(ma.Schema):
     into a readable format.
     """
     title = fields.String(required=True, validate=And(
-        Regexp('^[0-9a-zA-Z ]+$', error='Title must contain only letters, numbers and whitespaces'),
+        Regexp('^[0-9a-zA-Z -]+$', error='Title must contain only letters, numbers and whitespaces'),
         Length(min=3, error='Title must be at least 3 characters long')
     ))
     category = fields.String(required=True, validate=OneOf(VALID_CATEGORIES))
