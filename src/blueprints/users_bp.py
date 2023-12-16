@@ -20,12 +20,12 @@ from auth import authorize
 users_bp = Blueprint('users', __name__, url_prefix='/users')
 
 
-# Allows users to register themselves
+# Allows the registration of a user account
 @users_bp.route("/register", methods=["POST"])
 def register():
     try:
         # Parses incoming POST user data through the UserSchema
-        user_info = UserSchema(exclude=["id", "is_admin"]).load(request.json)
+        user_info = UserSchema(exclude=["id", "is_admin", "item_posts"]).load(request.json)
         # Create a new user record with the parsed data
         user = User(
             name=user_info["name"],
@@ -41,7 +41,7 @@ def register():
         db.session.commit()
 
         # Returns the new user information, without the password
-        return UserSchema(exclude=["password"]).dump(user), 201
+        return UserSchema(exclude=["password", "is_admin"]).dump(user), 201
     except IntegrityError:
         return {"error": "Username or email address already in use"}, 409
 
@@ -66,7 +66,7 @@ def login():
     if user and bcrypt.check_password_hash(user.password, request.json["password"]):
         # Create and return a JWT token if password hash matches
         token = create_access_token(identity=user.id, expires_delta=timedelta(hours=2))
-        return {'token': token, 'user': UserSchema(exclude=["password", 'item_posts']).dump(user)}, 202
+        return {'token': token, 'user': UserSchema(exclude=['password', 'is_admin', 'item_posts']).dump(user)}, 202
     # Returns error if password does not match
     else:
         return {"error": "Invalid email, username, or password"}, 401
@@ -87,6 +87,7 @@ def all_users():
 
 # Allows users to view specified user
 @users_bp.route('/<int:id>')
+@jwt_required()
 def one_user(id):
     # Select user that matches the specified id
     stmt = db.select(User).filter_by(id=id)

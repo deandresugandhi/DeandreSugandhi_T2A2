@@ -25,6 +25,7 @@ class User(db.Model):
     username = db.Column(db.String(20), nullable=False, unique=True)
     email = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
+    private_email = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default=False)
 
     # Relationships
@@ -60,6 +61,12 @@ class UserSchema(ma.Schema):
         only=['id', 'title', 'status', 'post_type', 'images'],
         many=True
     )
+
+    # Makes sure email is hidden with 'PRIVATE" when serializing the response
+    # when private_email is set to True
+    def pre_dump(self, data, **kwargs):
+        if data['private_email'] is True:
+            data['email'] = 'PRIVATE'
 
     class Meta:
         ordered = True

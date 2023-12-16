@@ -128,7 +128,7 @@ __HTTP Request__: GET
 
 __Required Data__: None
 
-__Expected Response Data__: Expected return of JSON response with data on multiple item posts from the database, based on __field__ and __keyword__ parameters, with a '200 OK' status code response
+__Expected Response Data__: Expected return of JSON response with data on multiple item posts from the database, based on __field__ and __keyword__ parameters for searching through the database, with a '200 OK' status code response
 
 __Authentication methods__: None
 
@@ -184,7 +184,7 @@ __HTTP Request__: DELETE
 
 __Required Data__: None
 
-__Expected Response Data__: Expected return of JSON response with data on the newly deleted item post, with a '200 OK' status code response
+__Expected Response Data__: Expected return of empty JSON response, with a '200 OK' status code response
 
 __Authentication methods__: Valid JWT token, authorize(item_post.user_id) which ensures the item post deleted is associated with either the same user id retrieved from get_jwt_identity() or a user with admin rights
 
@@ -230,69 +230,69 @@ OPTIONAL (None / default value is set if unspecified): images (list of dictionar
 
 __Expected Response Data__: Expected return of JSON response with data on the newly edited / updated comment (associated with the item post with __id__ same as that inputted as the __item_post_id__ parameter), with a '201 Created' status code response
 
-__Authentication methods__: 
+__Authentication methods__: Valid JWT token, authorize(comment.user_id) which ensures the comment edited / updated is associated with either the same user id retrieved from get_jwt_identity() or a user with admin rights
 
-__Purpose__:
+__Purpose__: Allows registered user (or admin) to edit some details on their own associated comments
 
 ### 10. /item-posts/&lt;item_post_id&gt;/comments/&lt;comment_id&gt;
 
 __HTTP Request__: DELETE
 
-__Required Data__:
+__Required Data__: None
 
-__Expected Response Data__:
+__Expected Response Data__: Expected return of empty JSON response, with a '200 OK' status code response
 
-__Authentication methods__:
+__Authentication methods__: Valid JWT token, authorize(comment.user_id) which ensures the comment is deleted by either its owner (user id retrieved from get_jwt_identity() must equal to comment.user_id), the owner of the item_post in which the comment is made (user id retrieved from get_jwt_identity() must equal to item_post.user_id), or a user with admin rights
 
-__Purpose__:
+__Purpose__: Allows registered user (or admin) to delete a comment associated with their own user account on an item post
 
 ### 11. /item-posts/locations/&lt;seen_or_pickup&gt;/&lt;field&gt;/&lt;keyword&gt;
 
 __HTTP Request__: GET
 
-__Required Data__:
+__Required Data__: None
 
-__Expected Response Data__:
+__Expected Response Data__: Expected return of JSON response with data on multiple item posts from the database, based on the __seen_or_pickup__, __field__ and __keyword__ parameters for searching through the database, with a '200 OK' status code response
 
-__Authentication methods__:
+__Authentication methods__: None
 
-__Purpose__:
+__Purpose__: Allows registered and unregistered users to search for item posts on the database by inputting __seen_or_pickup__ parameter (representing either the seen or pickup location record of the item posts), __field__ parameter (representing the column on the locations table) and __keyword__ parameter (representing the keyword to search for) in the URL
 
 ### 12. /users/register
 
 __HTTP Request__: POST
 
-__Required Data__:
+__Required Data__: name, username, email, password
 
-__Expected Response Data__:
+__Expected Response Data__: Expected return of JSON response with data on the newly created user account (excluding their password and admin rights), with a '201 Created' status code response
 
-__Authentication methods__:
+__Authentication methods__: None, but their password stored in the database will be hashed using Bcrypt
 
-__Purpose__:
+__Purpose__: Allows users to create and register their own user account to the database based on the details they submitted as a JSON response
 
 ### 13. /users/login
 
 __HTTP Request__: POST
 
-__Required Data__:
+__Required Data__: either username OR email, password
 
-__Expected Response Data__:
+__Expected Response Data__: Expected return of JSON response with data on the newly created user account (excluding their password and admin rights) and the generated JWT token, with a '202 Accepted' status code response
 
-__Authentication methods__:
+__Authentication methods__: username OR email that matches a user account in the database, and then password that when hashed using Bcrypt matches the hashed password of the account with the associated username OR email in the database
 
-__Purpose__:
+__Purpose__: Allows users to login to their own user account either using their username or email, and then inputting the correct password. Successful login grants them a JWT token that enables them to access some functionalities exclusive to those logged in to their user account
 
 ### 14. /users/
 
 __HTTP Request__: GET
 
-__Required Data__:
+__Required Data__: None
 
-__Expected Response Data__:
+__Expected Response Data__: Expected return of JSON response with data on all item posts on the database, with a '200 OK' status code response
 
-__Authentication methods__:
+__Authentication methods__: Valid JWT token
 
-__Purpose__:
+__Purpose__: Allows registered users to view data on all users on the database, except their passwords
 
 ### 15. /users/&lt;id&gt;
 
@@ -394,7 +394,7 @@ For the purpose of this application, a PostgreSQL database named "lost_and_found
 
 ### Users
 
-User-related information are stored in the __users__ table. Each record in the table represents a registered user in the application, with information on their name, username, email, hashed password, admin rights, and their unique ID (the primary key).
+User-related information are stored in the __users__ table. Each record in the table represents a registered user in the application, with information on their name, username, email, hashed password, admin rights, and their unique ID (the primary key). The private_email field, when set to True, hides the user's email when its record is displayed for example by GET routes.
 
 ### Item Posts
 

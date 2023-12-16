@@ -128,7 +128,7 @@ def delete_item_post(id):
         authorize(item_post.user_id)
         db.session.delete(item_post)
         db.session.commit()
-        return ItemPostSchema().dump(item_post), 200
+        return {}, 200
     else:
         return {'error': 'Item post not found'}, 404
 

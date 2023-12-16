@@ -35,6 +35,11 @@ def view_comments(item_post_id):
 @comments_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_comment(item_post_id):
+    # Checks if item post with the specified id exists
+    stmt = db.select(ItemPost).filter_by(id=item_post_id)
+    item_post = db.session.scalar(stmt)
+    if not item_post:
+        return {'error': 'Item post not found'}, 404
     # Parses incoming POST request body through CommentSchema
     comment_info = CommentSchema(only=['comment_text', 'images']).load(request.json)
     comment = Comment(
@@ -55,12 +60,16 @@ def create_comment(item_post_id):
 @comments_bp.route('/<int:comment_id>', methods=['PUT', 'PATCH'])
 @jwt_required()
 def update_comment(item_post_id, comment_id):
-    # Parses incoming POST request body through ItemPostSchema
+    # Parses incoming POST request body through CommentSchema
     comment_info = CommentSchema(only=['comment_text', 'images']).load(request.json)
     # Select comment matching id params from URL query
     stmt = db.select(Comment).filter_by(id=comment_id)
     comment = db.session.scalar(stmt)
-    if comment:
+    # Select item_post matching id params from URL query
+    stmt= db.select(ItemPost).filter_by(id=item_post_id)
+    item_post = db.session.scalar(stmt)
+    # Proceed if both item post and comment are found.
+    if comment and item_post:
         authorize(comment.user_id)
         # Change comment text
         comment.comment_text = comment_info.get('comment_text', comment.comment_text)
@@ -75,7 +84,6 @@ def update_comment(item_post_id, comment_id):
         return {'error': 'Comment not found'}, 404
 
 
-
 # Delete a comment
 @comments_bp.route('/<int:comment_id>', methods=['DELETE'])
 @jwt_required()
@@ -83,8 +91,12 @@ def delete_comment(item_post_id, comment_id):
     # Select comment matching id params from URL query
     stmt = db.select(Comment).filter_by(id=comment_id)
     comment = db.session.scalar(stmt)
-    if comment:
-        authorize(comment.user_id)
+    stmt = db.select(ItemPost).filter_by(id=item_post_id)
+    item_post = db.session.scalar(stmt)
+    if comment and item_post:
+        # Only allow either the comment's owner of item_post's owner to delete
+        # the specified comment
+        authorize(comment.user_id, item_post.user_id)
         db.session.delete(comment)
         db.session.commit()
         return {}, 200
