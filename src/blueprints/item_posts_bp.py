@@ -66,7 +66,7 @@ def one_item_post(id):
 @jwt_required()
 def create_item_post():
     # Parses incoming POST request body through ItemPostSchema
-    item_post_info = ItemPostSchema(exclude=['id', 'date']).load(request.json)
+    item_post_info = ItemPostSchema(exclude=['id', 'date', 'user', 'comments']).load(request.json)
     # Retrieve location information from parsed request
     seen_location, pickup_location = check_location(item_post_info)
     item_post = ItemPost(
@@ -128,7 +128,7 @@ def delete_item_post(id):
         authorize(item_post.user_id)
         db.session.delete(item_post)
         db.session.commit()
-        return {}, 200
+        return ItemPostSchema().dump(item_post), 200
     else:
         return {'error': 'Item post not found'}, 404
 

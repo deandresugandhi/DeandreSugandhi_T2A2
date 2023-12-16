@@ -14,4 +14,4 @@ app.register_blueprint(db_commands)
 app.register_blueprint(item_posts_bp)
 app.register_blueprint(users_bp)
 
-# print(app.url_map)
+print(app.url_map)
