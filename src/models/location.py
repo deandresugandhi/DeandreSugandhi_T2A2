@@ -56,11 +56,13 @@ class LocationSchema(ma.Schema):
     postcode = fields.Integer(required=True)
     country = fields.String(required=True)
 
+    # Ensures unit number is a string containing only digits
     @validates('unit_number')
     def validate_unit_number(self, value):
         if value and not value.isdigit():
             raise ValidationError('Unit number must contain only digits.')
 
+    # Ensures street number is a string containing only digits
     @validates('street_number')
     def validate_street_number(self, value):
         if value and not value.isdigit():

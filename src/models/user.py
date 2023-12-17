@@ -62,14 +62,16 @@ class UserSchema(ma.Schema):
         many=True
     )
 
-    # Makes sure email is hidden with 'PRIVATE" when serializing the response
-    # when private_email is set to True
+    # Makes sure email is hidden with 'PRIVATE' when serializing responses
+    # containing user data if private_email is set to True for that user
     @post_dump(pass_many=True)
     def hide_email(self, data, many, **kwargs):
+        # For when a list of users is dumped
         if many:
             for user_data in data:
                 if user_data['private_email']:
                     user_data['email'] = 'PRIVATE'
+        # For when a single user is dumped
         else:
             if data['private_email']:
                 data['email'] = 'PRIVATE'

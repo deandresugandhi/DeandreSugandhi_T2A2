@@ -10,8 +10,7 @@ from blueprints.item_posts_bp import item_posts_bp
 from blueprints.users_bp import users_bp
 
 
+# Register all blueprints
 app.register_blueprint(db_commands)
 app.register_blueprint(item_posts_bp)
 app.register_blueprint(users_bp)
-
-# print(app.url_map)

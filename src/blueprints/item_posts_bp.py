@@ -27,7 +27,8 @@ def all_item_posts():
     # Selects all item posts from the db
     stmt = db.select(ItemPost).order_by(desc('date'))
     item_posts = db.session.scalars(stmt).all()
-    # Returns all item posts, or error if none are found
+    # Returns serialized information on all item posts, or error if none are
+    # found
     if item_posts:
         return ItemPostSchema(many=True).dump(item_posts), 200
     return {'error': 'No item posts founds'}, 404
@@ -41,7 +42,8 @@ def search_posts(field, keyword):
         # Selects item posts based on the field and keyword params from URI query
         stmt = db.select(ItemPost).filter(field.ilike(f"%{keyword}%"))
         item_posts = db.session.scalars(stmt).all()
-        # Returns the matching item posts, or error if none are found
+        # Returns serialized information on the matching item posts, or error 
+        # if none are found
         if item_posts:
             return ItemPostSchema(many=True).dump(item_posts), 200
         return {'error': 'No item posts found'}, 404
@@ -55,7 +57,8 @@ def one_item_post(id):
     # Selects an item post from the db that matches the id
     stmt = db.select(ItemPost).filter_by(id=id)
     item_post = db.session.scalar(stmt)
-    # Returns the item post, or error if the item post is not found
+    # Returns serialized information on the item post, or error if the item post
+    # is not found
     if item_post:
         return ItemPostSchema().dump(item_post), 200
     return {'error': 'Item post not found'}, 404
@@ -86,6 +89,7 @@ def create_item_post():
     # Create attached image records and associate them with the created item post
     attach_image(item_post_info, item_post, "item_post")
 
+    # Returns serialized information on the new item post
     return ItemPostSchema().dump(item_post), 201
 
 
@@ -112,7 +116,9 @@ def edit_item_post(id):
             else:
                 setattr(item_post, field, value)
         db.session.commit()
+        # Returns serialized information on newly edited item post
         return ItemPostSchema().dump(item_post), 201
+    # Or return error if no item post matches the id
     else:
         return {'error': 'Item post not found'}, 404
 
@@ -125,6 +131,7 @@ def delete_item_post(id):
     stmt = db.select(ItemPost).filter_by(id=id)
     item_post = db.session.scalar(stmt)
     if item_post:
+        # Only the owner of the item post or admin is allowed to delete it
         authorize(item_post.user_id)
         db.session.delete(item_post)
         db.session.commit()
@@ -132,7 +139,6 @@ def delete_item_post(id):
     else:
         return {'error': 'Item post not found'}, 404
 
-
-
+# Nested blueprints
 item_posts_bp.register_blueprint(comments_bp)
 item_posts_bp.register_blueprint(locations_bp)

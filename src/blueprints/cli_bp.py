@@ -21,6 +21,8 @@ from models.location import Location
 
 db_commands = Blueprint('db', __name__)
 
+# Delete all tables in the db, then create all tables in the db based on the
+# defined models when command "flask db create" is entered
 @db_commands.cli.command("create")
 def db_create():
     db.drop_all()
@@ -28,6 +30,7 @@ def db_create():
     print("Tables created")
 
 
+# Seed the database when command "flask db seed" is entered
 @db_commands.cli.command("seed")
 def db_seed():
    # Locations
@@ -132,6 +135,7 @@ def db_seed():
     db.session.add_all(item_posts)
     db.session.commit()
 
+    # Comments
     comments = [
         Comment(
             comment_text="I think I may have found it, is this it? Check the photo.",
@@ -157,6 +161,7 @@ def db_seed():
     db.session.add_all(comments)
     db.session.commit()
 
+    # Images
     images = [
         Image(
             image_url = "lostlaptop.png",

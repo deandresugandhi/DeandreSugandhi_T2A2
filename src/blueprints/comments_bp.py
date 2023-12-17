@@ -25,7 +25,8 @@ def view_comments(item_post_id):
     # Selects an item post from the db that matches the id
     stmt = db.select(ItemPost).filter_by(id=item_post_id)
     item_post = db.session.scalar(stmt)
-    # Returns the item post, or error if the item post is not found
+    # Returns serialized information on the item post but only its comments, 
+    # or error if the item post is not found
     if item_post:
         return ItemPostSchema(only=["comments"]).dump(item_post), 200
     return {'error': 'Item post not found'}, 404
@@ -38,6 +39,7 @@ def create_comment(item_post_id):
     # Checks if item post with the specified id exists
     stmt = db.select(ItemPost).filter_by(id=item_post_id)
     item_post = db.session.scalar(stmt)
+    # Returns error if no item posts are found that matches item_post_id
     if not item_post:
         return {'error': 'Item post not found'}, 404
     # Parses incoming POST request body through CommentSchema
@@ -53,6 +55,7 @@ def create_comment(item_post_id):
     # Create attached image records and associate them with the created comment
     attach_image(comment_info, comment, "comment")
 
+    # Return serialized information on the newly created comment
     return CommentSchema().dump(comment), 201
 
 
@@ -79,6 +82,7 @@ def update_comment(item_post_id, comment_id):
             clear_attached_images(comment, "comment")
             attach_image(comment_info, comment, "comment")
         db.session.commit()
+        # Return serialized information on the newly updated comment
         return CommentSchema().dump(comment), 201
     else:
         return {'error': 'Comment not found'}, 404
@@ -94,8 +98,8 @@ def delete_comment(item_post_id, comment_id):
     stmt = db.select(ItemPost).filter_by(id=item_post_id)
     item_post = db.session.scalar(stmt)
     if comment and item_post:
-        # Only allow either the comment's owner of item_post's owner to delete
-        # the specified comment
+        # Only allow the comment's owner, item_post's owner, or admin
+        # to delete the specified comment
         authorize(comment.user_id, item_post.user_id)
         db.session.delete(comment)
         db.session.commit()

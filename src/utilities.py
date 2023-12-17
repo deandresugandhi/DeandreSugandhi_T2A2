@@ -30,10 +30,12 @@ def check_location(parsed_info):
         2. location_attribute (str): The location attribute refers to either
         "seen_location" or "pickup_location" key of the raw_info dictionary.
         """
+        # If parsed info does not contain seen or pickup location, return None
         if location_attribute not in parsed_info:
             return None
         location_data = parsed_info[location_attribute]
         location_info = LocationSchema().load(location_data)
+        # Checks if the attached location already exists in the db
         stmt = db.select(Location).filter_by(**location_info)
         existing_location = db.session.scalar(stmt)
         # If location exists already, returns existing location instead of
@@ -42,7 +44,7 @@ def check_location(parsed_info):
             return existing_location
         else:
             location = Location(**location_info)
-            # Session added but not committed, for error handling purposes.
+            # Session added but not committed, for error handling purposes later.
             db.session.add(location)
             return location
 
@@ -75,6 +77,7 @@ def attach_image(parsed_info, record, model):
 
     # Check if there are any images that need to be attached in the parsed information.
     if parsed_info.get("images", ""):
+        # Create new image records one by one based on image_url
         for image in parsed_info.get("images"):
             image_info = ImageSchema(only=["image_url"]).load(image)
             if image_info:
@@ -91,9 +94,20 @@ def attach_image(parsed_info, record, model):
 
 
 def clear_attached_images(record, model):
+    """
+    A function to clear all attached image in a record, namely item comment
+    and item post.
+
+    Args:
+    1. record (Model instance): The record which the image will be attached to.
+    2. model (str): The name of the model in which to attach the image, i.e.
+    "comment" or "item_post"
+    """
     model_id = model + "_id"
+    # Find all images in the db associated with record's id
     stmt = db.select(Image).filter(getattr(Image, model_id) == record.id)
     attached_images = db.session.scalars(stmt).all()
+    # Delete them one by one
     for image in attached_images:
         db.session.delete(image)
     db.session.commit()

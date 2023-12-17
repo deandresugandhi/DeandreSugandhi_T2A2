@@ -122,6 +122,8 @@ __Authentication methods__: None
 
 __Purpose__: Allows registered and unregistered users to view all item posts on the database
 
+![Item Post GET ALL](./docs/images/screenshots/ItemPostGET_ALL.png)
+
 ### 2. /item-posts/&lt;field&gt;/&lt;keyword&gt;
 
 __HTTP Request__: GET
@@ -134,6 +136,8 @@ __Authentication methods__: None
 
 __Purpose__: Allows registered and unregistered users to search for item posts on the database by inputting __field__ parameter (representing the column on the item posts table) and __keyword__ parameter (representing the keyword to search for) in the URL
 
+![Item Post SEARCH](./docs/images/screenshots/ItemPostSEARCH.png)
+
 ### 3. /item-posts/&lt;id&gt;
 
 __HTTP Request__: GET
@@ -145,6 +149,8 @@ __Expected Response Data__: Expected return of JSON response with data on a spec
 __Authentication methods__: None
 
 __Purpose__: Allows registered and unregistered users to view an item post of a specific id by inputting its __id__ in the __id__ parameter in the URL.
+
+![Item Post GET ONE](./docs/images/screenshots/ItemPostGET_ONE.png)
 
 ### 4. /item-posts/
 
@@ -162,6 +168,8 @@ __Authentication methods__: Valid JWT token
 
 __Purpose__: Allows registered users to create an item post which will be associated with their user account. Also creates a new location record if seen_location or pickup_location address does not exist in the locations table yet, and creates a new record in the images table for each new image attached.
 
+![Item Post CREATE](./docs/images/screenshots/ItemPostCREATE.png)
+
 ### 5. /item-posts/&lt;id&gt;
 
 __HTTP Request__: PUT, PATCH
@@ -178,6 +186,8 @@ __Authentication methods__: Valid JWT token, authorize(item_post.user_id) which 
 
 __Purpose__: Allows registered user (or admin) to edit some details on their own associated item post
 
+![Item Post EDIT](./docs/images/screenshots/ItemPostEDIT.png)
+
 ### 6. /item-posts/&lt;id&gt;
 
 __HTTP Request__: DELETE
@@ -190,6 +200,8 @@ __Authentication methods__: Valid JWT token, authorize(item_post.user_id) which 
 
 __Purpose__: Allows registered user (or admin) to delete an item post associated with their user account
 
+![Item Post DELETE](./docs/images/screenshots/ItemPostDELETE.png)
+
 ### 7. /item-posts/&lt;item_post_id&gt;/comments/
 
 __HTTP Request__: GET
@@ -201,6 +213,8 @@ __Expected Response Data__: Expected return of JSON response with data on all co
 __Authentication methods__: None
 
 __Purpose__: Allows registered and unregistered users to view the comments in an item post of a specific id by inputting its __id__ as the __item_post_id__ parameter in the URL
+
+![Comment GET ALL](./docs/images/screenshots/CommentGET_ALL.png)
 
 ### 8. /item-posts/&lt;item_post_id&gt;/comments/
 
@@ -218,6 +232,8 @@ __Authentication methods__: Valid JWT token
 
 __Purpose__: Allows registered users to create a comment in an item post of a specific id by inputting its __id__ as the __item_post_id__ parameter in the URL
 
+![Comment CREATE](./docs/images/screenshots/CommentCREATE.png)
+
 ### 9. /item-posts/&lt;item_post_id&gt;/comments/&lt;comment_id&gt;
 
 __HTTP Request__: PUT, PATCH
@@ -234,6 +250,8 @@ __Authentication methods__: Valid JWT token, authorize(comment.user_id) which en
 
 __Purpose__: Allows registered user (or admin) to edit some details on their own associated comments
 
+![Comment EDIT](./docs/images/screenshots/CommentEDIT.png)
+
 ### 10. /item-posts/&lt;item_post_id&gt;/comments/&lt;comment_id&gt;
 
 __HTTP Request__: DELETE
@@ -246,6 +264,8 @@ __Authentication methods__: Valid JWT token, authorize(comment.user_id) which en
 
 __Purpose__: Allows registered user (or admin) to delete a comment associated with their own user account on an item post
 
+![Comment DELETE](./docs/images/screenshots/CommentDELETE.png)
+
 ### 11. /item-posts/locations/&lt;seen_or_pickup&gt;/&lt;field&gt;/&lt;keyword&gt;
 
 __HTTP Request__: GET
@@ -257,6 +277,8 @@ __Expected Response Data__: Expected return of JSON response with data on multip
 __Authentication methods__: None
 
 __Purpose__: Allows registered and unregistered users to search for item posts on the database by inputting __seen_or_pickup__ parameter (representing either the seen or pickup location record of the item posts), __field__ parameter (representing the column on the locations table) and __keyword__ parameter (representing the keyword to search for) in the URL
+
+![Location SEARCH](./docs/images/screenshots/LocationSEARCH.png)
 
 ### 12. /users/register
 
@@ -274,6 +296,8 @@ __Authentication methods__: None, but their password stored in the database will
 
 __Purpose__: Allows users to create and register their own user account to the database based on the details they submitted as a JSON response
 
+![User REGISTER](./docs/images/screenshots/UserREGISTER.png)
+
 ### 13. /users/login
 
 __HTTP Request__: POST
@@ -285,6 +309,8 @@ __Expected Response Data__: Expected return of JSON response with data on the ne
 __Authentication methods__: username OR email that matches a user account in the database, and then password that when hashed using Bcrypt matches the hashed password of the account with the associated username OR email in the database
 
 __Purpose__: Allows users to login to their own user account either using their username or email, and then inputting the correct password. Successful login grants them a JWT token that enables them to access some functionalities exclusive to those logged in to their user account
+
+![User LOGIN](./docs/images/screenshots/UserLOGIN.png)
 
 ### 14. /users/
 
@@ -298,6 +324,8 @@ __Authentication methods__: Valid JWT token
 
 __Purpose__: Allows registered users to view data on all users on the database, except their passwords
 
+![User GET ALL](./docs/images/screenshots/UserGET_ALL.png)
+
 ### 15. /users/&lt;id&gt;
 
 __HTTP Request__: GET
@@ -309,6 +337,8 @@ __Expected Response Data__: Expected return of JSON response with data on the ne
 __Authentication methods__: Valid JWT token
 
 __Purpose__: Allows registered users to view a user of a specific user id by inputting its __id__ in the __id__ parameter in the URL
+
+![User GET ONE](./docs/images/screenshots/UserGET_ONE.png)
 
 ### 16. /users/&lt;id&gt;
 
@@ -324,6 +354,8 @@ __Authentication methods__: Valid JWT token, authorize(user.id) which ensures th
 
 __Purpose__: Allows registered users (or admin) to edit the details of their own user account. Only admin can edit admin rights of any users
 
+![User EDIT](./docs/images/screenshots/UserEDIT.png)
+
 ### 17. /users/&lt;user_id&gt;
 
 __HTTP Request__: DELETE
@@ -335,6 +367,8 @@ __Expected Response Data__: Expected return of empty JSON response, with a '201 
 __Authentication methods__: Valid JWT token, authorize(user.id) which ensures the user account deleted is associated with either the same user id retrieved from get_jwt_identity() or a user with admin rights
 
 __Purpose__: Allows registered users (or admin) to delete their own user account
+
+![User DELETE](./docs/images/screenshots/UserDELETE.png)
 
 ## R6 - An ERD for your app
 
@@ -370,33 +404,33 @@ JWT Manager is used to manage JSON web tokens, used for secure user authenticati
 
 ### User model
 
-The User model represents a user record in the database. It has one-to-many relationships with the ItemPost and Comment models, meaning that a user can be associated with multiple item posts and comments as their owner, but each item post and comment stored in the database can only have one user as its original owner. To define this relationship, user_id is used as a foreign key in the ItemPost and Comment models. The cascade deletes ensure that all comments and item posts owned by a user is also removed from the database when that user is deleted.
+The __User__ model represents a __user__ record in the database. It has one-to-many relationships with the __ItemPost__ and __Comment__ models, meaning that a __user__ can be associated with multiple __item posts__ and __comments__ as their owner, but each __item post__ and __comment__ stored in the database can only have one __user__ as its original owner. To define this relationship, __user_id__ is used as a foreign key in the __ItemPost__ and __Comment__ models. The cascade deletes ensure that all __comments__ and __item posts__ owned by a __user__ is also removed from the database when that __user__ is deleted.
 
 ### Location model
 
-The Location model represents an address used in the app. It has one-to-many relationships with the ItemPost model, meaning that each location can be associated with multiple item posts, while each item post can only refer to one location record. In this case, however, each item post is linked to up to two location records, as an item post has two attributes linked to the Location model defined by the foreign keys in the __ItemPost__ model named __seen_location_id__ and __pickup_location_id__, both referring to the __location_id__ primary key of the __Location__ model. Further details will be explained in the __ItemPost__ model section.
+The __Location__ model represents an address used in the app. It has one-to-many relationships with the __ItemPost__ model, meaning that each __location__ can be associated with multiple __item posts__, while each __item post__ can only refer to one __location__ record. In this case, however, each __item post__ is linked to up to two __location__ records, as an item post has two attributes linked to the __Location__ model defined by the foreign keys in the __ItemPost__ model named __seen_location_id__ and __pickup_location_id__, both referring to the __location_id__ primary key of the __Location__ model. Further details will be explained in the __ItemPost__ model section.
 
 ### ItemPost model
 
-The ItemPost model represents an item post record in the database. It has multiple relationships with multiple models. Firstly, it has a many-to-one relationship with the User model, meaning that a user can own multiple item posts but an item post can only have one user associated with it as its owner. This relationship is defined by using user_id as a foreign key in the ItemPost model.
+The __ItemPost__ model represents an __item post__ record in the database. It has multiple relationships with multiple models. Firstly, it has a many-to-one relationship with the __User__ model, meaning that a __user__ can own multiple __item posts__ but an __item post__ can only have one __user__ associated with it as its owner. This relationship is defined by using __user_id__ as a foreign key in the __ItemPost__ model.
 
-Secondly, it has a one-to-many relationship with the Comment and Image model, since an item post can have multiple comments / images posted to it, while each comment / image can only be associated with one item post. This relationship is defined by using item_post_id as a foreign key in both the Comment and Image model. The cascade deletes ensure that the comments and images associated with an item post are also removed from the database when that item post is deleted.
+Secondly, it has a one-to-many relationship with the __Comment__ and __Image__ model, since an __item post__ can have multiple __comments__ / __images__ posted to it, while each __comment__ / __image__ can only be associated with one __item post__. This relationship is defined by using __item_post_id__ as a foreign key in both the __Comment__ and __Image__ model. The cascade deletes ensure that the __comments__ and __images__ associated with an __item post__ are also removed from the database when that __item post__ is deleted.
 
-Thirdly, it has a many-to-one relationship with the Location model. There are two attributes in the ItemPost model that refers to records in the Location model, namely seen_location_id (refers to the location in which the item was found or lost) and pickup_location_id (refers to the location in which the item can / requested to be picked up). These two are foreign keys in the ItemPost model referring to location_id in the Location model, defining this relationship. Each item post can only have one seen location and pickup location, while each location can be associated with multiple item posts.
+Thirdly, it has a many-to-one relationship with the __Location__ model. There are two attributes in the __ItemPost__ model that refers to records in the __Location__ model, namely __seen_location_id__(refers to the location in which the item was found or lost) and __pickup_location_id__ (refers to the location in which the item can / requested to be picked up). These two are foreign keys in the __ItemPost__ model referring to __location_id__ in the __Location__ model, defining this relationship. Each __item post__ can only have one seen location and pickup location, while each location can be associated with multiple __item posts__.
 
 ### Comment model
 
-The Comment model represents a comment posted on an item post. It has many-to-one relationships with the ItemPost and User models. A user can create multiple comments across multiple item posts, while each comment can only be owned by one user. Similarly, an item post can contain multiple comments posted into it, but a comment can only be associated with one item post, i.e. the item post in which it was posted. The relationship is defined through the inclusion of user_id (primary key of the User model) and item_post_id (primary key of the ItemPost model) as foreign keys in the Comment model.
+The __Comment__ model represents a comment posted on an item post. It has many-to-one relationships with the __ItemPost__ and __User__ models. A __user__ can create multiple __comments__ across multiple __item posts__, while each __comment__ can only be owned by one __user__. Similarly, an __item post__ can contain multiple __comments__ posted into it, but a __comment__ can only be associated with one __item post__, i.e. the __item post__ in which it was posted. The relationship is defined through the inclusion of __user_id__ (primary key of the __User__ model) and __item_post_id__ (primary key of the __ItemPost__ model) as foreign keys in the __Comment__ model.
 
-It also has a one-to-many relationship with the Image model, as users can attach multiple images into their comments, with each image record stored in the database associated with only one comment / item_post. This relationship is defined by the comment_id foreign key (referring to the primary key of the Comment model) in the Image model.
+It also has a one-to-many relationship with the __Image__ model, as __users__ can attach multiple __images__ into their __comments__, with each __image__ record stored in the database associated with only one __comment__ / __item post__. This relationship is defined by the __comment_id__ foreign key (referring to the primary key of the __Comment__ model) in the __Image__ model.
 
 ### Image model
 
-The Image model represents an image that is attached to either an item post or comment. It forms many-to-one relationships with the ItemPost and Comment models, as a user can attach multiple images into their item posts / comments, while each image can only be associated with one item post / comment. These relationships are defined by using comment_id (primary key of the Comment model) and item_post_id (primary key of the ItemPost model) as foreign keys in the Image model. A constraint is defined using SQLAlchemy's CheckConstraint class with XOR operator to specify that an image can only be associated with one of either an item post or comment, but not both.
+The __Image__ model represents an __image__ that is attached to either an __item post__ or __comment__. It forms many-to-one relationships with the __ItemPost__ and __Comment__ models, as a __user__ can attach multiple __images__ into their __item posts__ / __comments__, while each __image__ can only be associated with one __item post__ / __comment__. These relationships are defined by using __comment_id__ (primary key of the __Comment__ model) and __item_post_id__ (primary key of the __ItemPost__ model) as foreign keys in the __Image__ model. A constraint is defined using SQLAlchemy's CheckConstraint class forming a form of XOR operation to specify that an image can only be associated with one of either an item post or comment, but not both.
 
 ## R9 - Discuss the database relations to be implemented in your application
 
-For the purpose of this application, a PostgreSQL database named "lost_and_found_db" is created. To implement the relations and their relationships with one another, 5 tables are created in the database, namely users, item_posts, comments, images, and locations. The interaction between the records in these 5 relations will determine the main functionalities and behavior of the app.
+For the purpose of this application, a PostgreSQL database named __lost_and_found_db__ is created. To implement the relations and their relationships with one another, 5 tables are created in the database, namely __users__, __item_posts__, __comments__, __images__, and __locations__. The interaction between the records in these 5 relations will determine the main functionalities and behavior of the app.
 
 ### Users
 
@@ -416,7 +450,7 @@ Image-related information are stored in the __images__ table. Each record in the
 
 ### Location
 
-Location-related information are stored in the __location__ table. Each record in the table represents a location / address that has been registered with an __item_post__ record, containing information on its street number, street name, suburb, postcode, and country. Originally, a __postcodes__ table was planned to be created, as a postcode usually determines the state and suburb, which can thus be used as a primary key as they are unique. However, upon further research, this is cancelled because it seems that the relationship between postcodes, suburb, and state is more complicated than originally thought, as in rare cases a suburb can span multiple postcodes, and multiple states can have suburbs with the same name.
+Location-related information are stored in the __location__ table. Each record in the table represents a location / address that has been registered with an __item_post__ record, containing information on its unit number, street number, street name, suburb, state, postcode, and country. Originally, a __postcodes__ table was planned to be created, as a postcode usually determines the state and suburb, which can thus be used as a primary key as they are unique. However, upon further research, this is cancelled because it seems that the relationship between postcodes, suburb, and state is more complicated than originally thought, as in rare cases a suburb can span multiple postcodes, and multiple states can have suburbs with the same name. A unique constraint is added to the model using SQLAlchemy's UniqueConstraint class, which ensures that each record has a unique combination of unit number, street number, street name, suburb, state, postcode, and country.
 
 ## R10 - Describe the way tasks are allocated and tracked in your project
 
