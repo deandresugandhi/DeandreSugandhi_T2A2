@@ -27,7 +27,7 @@
     - [Python Installation](https://www.python.org/downloads/)
     - [Pip Installation](https://pip.pypa.io/en/stable/installation/)
 
-2. For WSL, in the terminal, start PostgreSQL with: 
+2. For WSL, in the terminal, start PostgreSQL with:
 
     ```
     sudo -u postgres psql
