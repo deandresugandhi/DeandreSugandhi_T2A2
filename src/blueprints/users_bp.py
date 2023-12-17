@@ -112,7 +112,7 @@ def update_user(id):
         try:
             for field, value in user_info.items():
                 # Edits name, username, and/or email information of user
-                if field in ['name', 'username', 'email']:
+                if field in ['name', 'username', 'email', 'private_email']:
                     setattr(user, field, value)
                 # Hashes the new password if password is updated
                 elif field == 'password':
@@ -139,7 +139,7 @@ def delete_user(user_id):
     stmt = db.select(User).filter_by(id=user_id)
     user = db.session.scalar(stmt)
     if user:
-        authorize()
+        authorize(user.id)
         db.session.delete(user)
         db.session.commit()
         return {}, 200

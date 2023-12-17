@@ -262,7 +262,11 @@ __Purpose__: Allows registered and unregistered users to search for item posts o
 
 __HTTP Request__: POST
 
-__Required Data__: name, username, email, password
+__Required Data__:
+
+REQUIRED: name, username, email, password
+
+OPTIONAL (None / default value is set if unspecified): private_email
 
 __Expected Response Data__: Expected return of JSON response with data on the newly created user account (excluding their password and admin rights), with a '201 Created' status code response
 
@@ -298,13 +302,13 @@ __Purpose__: Allows registered users to view data on all users on the database, 
 
 __HTTP Request__: GET
 
-__Required Data__:
+__Required Data__: None
 
-__Expected Response Data__:
+__Expected Response Data__: Expected return of JSON response with data on the newly created user account, with a '200 OK' status code response
 
-__Authentication methods__:
+__Authentication methods__: Valid JWT token
 
-__Purpose__:
+__Purpose__: Allows registered users to view a user of a specific user id by inputting its __id__ in the __id__ parameter in the URL
 
 ### 16. /users/&lt;id&gt;
 
@@ -312,23 +316,25 @@ __HTTP Request__: PUT, PATCH
 
 __Required Data__:
 
-__Expected Response Data__:
+OPTIONAL (None / default value is set if unspecified): name, username, email, password, private_email
 
-__Authentication methods__:
+__Expected Response Data__: Expected return of JSON response with data on the newly edited / updated users (associated with the user with __id__ that is the same as that inputted in __id__ parameter in the URL), with a '201 Created' status code response
 
-__Purpose__:
+__Authentication methods__: Valid JWT token, authorize(user.id) which ensures the user accounts edited / updated is associated with either the same user id retrieved from get_jwt_identity() or a user with admin rights
+
+__Purpose__: Allows registered users (or admin) to edit the details of their own user account. Only admin can edit admin rights of any users
 
 ### 17. /users/&lt;user_id&gt;
 
 __HTTP Request__: DELETE
 
-__Required Data__:
+__Required Data__: None
 
-__Expected Response Data__:
+__Expected Response Data__: Expected return of empty JSON response, with a '201 OK' status code
 
-__Authentication methods__:
+__Authentication methods__: Valid JWT token, authorize(user.id) which ensures the user account deleted is associated with either the same user id retrieved from get_jwt_identity() or a user with admin rights
 
-__Purpose__:
+__Purpose__: Allows registered users (or admin) to delete their own user account
 
 ## R6 - An ERD for your app
 

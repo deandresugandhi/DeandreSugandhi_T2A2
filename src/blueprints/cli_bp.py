@@ -5,7 +5,7 @@ database.
 
 
 # Standard Library Modules
-from datetime import date, datetime
+from datetime import datetime
 
 # Third-party Library Modules
 from flask import Blueprint
@@ -69,6 +69,7 @@ def db_seed():
             username="admin",
             email="admin@spam.com",
             password=bcrypt.generate_password_hash("admin123").decode("utf8"),
+            private_email=True,
             is_admin=True,
         ),
         User(
