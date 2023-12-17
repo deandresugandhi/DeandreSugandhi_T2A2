@@ -531,6 +531,28 @@ Git is used to keep track of the versions, with frequent meaningful git commits 
 
 The standup section of Coder Academy's discord channel is also helpful to track my progress and compare it with other students' progress, reflecting whether or not I am relatively behind or ahead throughout the project. However, I feel like I did not check and update enough in this section, which is something I aim to improve in the future. Similarly, I find that I wasn't sufficiently organized in my tasks allocation for this project. For example, I started coding in a haste before I made sure my planning is solid; as a result, my coding phase was rather messy, using a lot of time to debug and thinking about how to make my code run well, which I definitely could've avoided if I had completed the planning before starting to code. I also create the GitHub Project quite late into the project, which kind of defeats the purpose of task allocation. I still find it helpful in completing my project, although it could've been more useful if I had created it earlier, making the evolution of my project more streamlined.
 
+### Screenshots
+
+![GitHub Project 1](./docs/images/screenshots/githubprojects1.png)
+
+![GitHub Project 2](./docs/images/screenshots/githubprojects2.png)
+
+![GitHub Project 3](./docs/images/screenshots/githubprojects3.png)
+
+![GitHub Project 4](./docs/images/screenshots/githubprojects4.png)
+
+![GitHub Project 5](./docs/images/screenshots/githubprojects5.png)
+
+![GitHub Project 6](./docs/images/screenshots/githubprojects6.png)
+
+![GitHub Project 7](./docs/images/screenshots/githubprojects7.png)
+
+![GitHub Project 8](./docs/images/screenshots/githubprojects8.png)
+
+![GitHub Project 9](./docs/images/screenshots/githubprojects9.png)
+
+![GitHub Project 10](./docs/images/screenshots/githubprojects10.png)
+
 ## Reference List
 
 Abba, I. V. (2022). _What is an ORM: the meaning of object relational mapping database tools_. FreeCodeCamp. https://www.freecodecamp.org/news/what-is-an-orm-the-meaning-of-object-relational-mapping-database-tools/
