@@ -69,11 +69,11 @@ class UserSchema(ma.Schema):
         # For when a list of users is dumped
         if many:
             for user_data in data:
-                if user_data['private_email']:
+                if 'private_email' in user_data and user_data['private_email']:
                     user_data['email'] = 'PRIVATE'
         # For when a single user is dumped
         else:
-            if data['private_email']:
+            if 'private_email' in data and data['private_email']:
                 data['email'] = 'PRIVATE'
 
         return data
