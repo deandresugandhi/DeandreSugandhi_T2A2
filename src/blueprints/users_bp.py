@@ -34,7 +34,7 @@ def register():
             password=bcrypt.generate_password_hash(user_info["password"]).decode(
                 "utf8"
             ),
-            private_email = user_info["private_email"]
+            private_email = user_info.get("private_email", False)
         )
 
         # Add and commit the new user to the database
