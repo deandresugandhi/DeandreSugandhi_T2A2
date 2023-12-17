@@ -160,7 +160,7 @@ __Expected Response Data__: Expected return of JSON response with data on the ne
 
 __Authentication methods__: Valid JWT token
 
-__Purpose__: Allows registered users to create an item post which will be associated with their user account.
+__Purpose__: Allows registered users to create an item post which will be associated with their user account. Also creates a new location record if seen_location or pickup_location address does not exist in the locations table yet, and creates a new record in the images table for each new image attached.
 
 ### 5. /item-posts/&lt;id&gt;
 

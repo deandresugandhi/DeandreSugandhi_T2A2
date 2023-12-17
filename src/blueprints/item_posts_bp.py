@@ -94,7 +94,7 @@ def create_item_post():
 @jwt_required()
 def edit_item_post(id):
     # Parses incoming POST request body through ItemPostSchema
-    item_post_info = ItemPostSchema(exclude=['id', 'date', 'user', 'comments']).load(request.json)
+    item_post_info = ItemPostSchema(exclude=['id', 'date', 'user', 'comments']).load(request.json, partial=True)
     # Select item post matching id params from URL query
     stmt = db.select(ItemPost).filter_by(id=id)
     item_post = db.session.scalar(stmt)

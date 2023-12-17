@@ -33,7 +33,8 @@ def register():
             email=user_info["email"],
             password=bcrypt.generate_password_hash(user_info["password"]).decode(
                 "utf8"
-            )
+            ),
+            private_email = user_info["private_email"]
         )
 
         # Add and commit the new user to the database
@@ -94,7 +95,8 @@ def one_user(id):
     user = db.session.scalar(stmt)
     # Returns the user, or error if the user is not found
     if user:
-        return UserSchema(exclude=['password']).dump(user), 200
+        serialized_user = UserSchema(exclude=['password']).dump(user)
+        return serialized_user, 200
     return {'error': 'User not found'}, 404
 
 

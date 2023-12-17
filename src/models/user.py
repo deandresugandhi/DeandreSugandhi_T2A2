@@ -2,9 +2,8 @@
 A module containing the model and schema of a user record in the database.
 """
 
-
 # Third-party Library Modules
-from marshmallow import fields
+from marshmallow import fields, post_dump
 from marshmallow.validate import Length, And, Regexp
 
 # Local Modules
@@ -52,6 +51,7 @@ class UserSchema(ma.Schema):
         )
     )
     email = fields.Email(required=True)
+    private_email = fields.Boolean()
     password = fields.String(
         required=True,
         validate=Length(min=8, error="Password must be at least 8 characters long."),
@@ -64,10 +64,18 @@ class UserSchema(ma.Schema):
 
     # Makes sure email is hidden with 'PRIVATE" when serializing the response
     # when private_email is set to True
-    def pre_dump(self, data, **kwargs):
-        if data['private_email'] is True:
-            data['email'] = 'PRIVATE'
+    @post_dump(pass_many=True)
+    def hide_email(self, data, many, **kwargs):
+        if many:
+            for user_data in data:
+                if user_data['private_email']:
+                    user_data['email'] = 'PRIVATE'
+        else:
+            if data['private_email']:
+                data['email'] = 'PRIVATE'
+
+        return data
 
     class Meta:
         ordered = True
-        fields = ("id", "name", "username", "email", "password", "is_admin", "item_posts")
+        fields = ("id", "name", "username", "email", "password", "is_admin", "item_posts", "private_email")

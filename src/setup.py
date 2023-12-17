@@ -39,11 +39,11 @@ def bad_request(err):
 
 @app.errorhandler(ValidationError)
 def validation_error(err):
-    return {'error': err.messages}, 400
+    return {'error': str(err)}, 400
 
 @app.errorhandler(IntegrityError)
 def integrity_error(err):
-    return {'error': err.messages}, 409
+    return {'error': str(err)}, 409
 
 @app.errorhandler(ValueError)
 def value_error(err):
