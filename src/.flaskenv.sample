@@ -1,4 +1,4 @@
-FLASK_RUN_PORT= # Flask server port
+FLASK_RUN_PORT= # Flask server port, 5555 recommended
 FLASK_DEBUG= # Set TRUE if using debug mode
-JWT_KEY= # Secret key for JWT tokens
+JWT_KEY= # Secret key for JWT tokens. Use the following format: "<any_string>"
 DB_URI= # Use the following format: "postgresql+psycopg2://<db_admin_username>:<db_admin_password>@localhost:5432/<db_name>

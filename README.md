@@ -18,6 +18,71 @@
 - [R10](#r10---describe-the-way-tasks-are-allocated-and-tracked-in-your-project)
 - [Reference List](#reference-list)
 
+## Installation Instructions
+
+### Setting up database
+
+1. Ensure PostgreSQL, Python, and Pip is installed. Refer to the following links:
+    - [PostgreSQL Installation](https://www.postgresql.org/docs/current/tutorial-install.html)
+    - [Python Installation](https://www.python.org/downloads/)
+    - [Pip Installation](https://pip.pypa.io/en/stable/installation/)
+
+2. For WSL, in the terminal, start PostgreSQL with: 
+
+    ```
+    sudo -u postgres psql
+    ```
+
+    For MacOS, in the terminal, start PostgreSQL with:
+
+    ```
+    psql postgres
+    ```
+
+3. Create a new database with:
+
+    ```
+    CREATE DATABASE <db_name>
+    ```
+
+    Replace &lt;db_name&gt; with your choice of database name. For the purpose of this documentation, the database name is assumed to be __lost_and_found_db__.
+
+4. Open a new terminal window. Navigate to __DeandreSugandhi_T2A2/src__ directory. Create a virtual environment with:
+
+    ```
+    python3 -m venv venv
+    ```
+    
+    Then activate it using:
+
+    ```
+    source venv/bin/activate
+    ```
+
+5. Install the dependencies using:
+
+    ```
+    pip install -r requirements.txt
+    ```
+
+6. Create a __.flaskenv__ file in the __src__ directory. Copy paste the code in __.flaskenv.sample__ file into it, then fill in each field according to its corresponding comments / guides. Recommended value for __FLASK_RUN_PORT__ is 5555.
+
+6. Run the following commands to create and seed the tables in the database:
+
+    ```
+    flask db create
+    ```
+
+    ```
+    flask db seed
+    ```
+
+    ```
+    flask run
+    ```
+
+7. Open Insomnia, or install it from this [link](https://docs.insomnia.rest/insomnia/install). Use localhost:<flask_run_port_value> in the URL, or if you follow the recommended value for __.flaskenv.__, localhost:5555.
+
 ## R1 - Identification of the problem you are trying to solve by building this particular app
 
 The purpose of this app is to assist people trying to find and retrieve items they have lost, especially in establishments where this may occur more often, such as train stations, buses, printing stations / internet cafes (leaving USBs / other portable storage devices in the computers), supermarkets, and cinemas, as well as in 'unowned' spaces which may not have a dedicated lost-and-found facility, such as public roads, highways, sidewalks, bus stops, public toilets, some recreation areas, public markets, and open plazas.
